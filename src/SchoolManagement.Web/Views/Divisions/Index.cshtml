@@ -1,0 +1,49 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.DivisionMaster>
+@{
+    ViewData["Title"] = "Divisions";
+}
+
+<div class="content-card">
+    <div class="card-header-crimson">
+        <h5>Divisions List</h5>
+        <a asp-action="Create" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Division</a>
+    </div>
+    <div class="card-body-custom p-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-datatable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Division Name</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.DivisionId</td>
+                            <td class="fw-semibold text-primary">@item.DivisionName</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-inactive">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@item.DivisionId" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                <a asp-action="Details" asp-route-id="@item.DivisionId" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye-fill text-dark"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.DivisionId" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash-fill"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,211 @@
+@model SchoolManagement.Domain.Entities.StudentDetailsView
+@{
+    ViewData["Title"] = "Student Profile";
+    var historyList = ViewBag.History as IEnumerable<SchoolManagement.Domain.Entities.StudentDetailsView> ?? new List<SchoolManagement.Domain.Entities.StudentDetailsView>();
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col-sm-8">
+        <h3 class="fw-bold mb-1">Student Profile Details</h3>
+        <p class="text-muted mb-0">GR No: <strong class="text-dark">@Model.GrNo</strong> | Admission Date: <strong>@Model.AdmissionDate.ToString("dd-MMM-yyyy")</strong></p>
+    </div>
+    <div class="col-sm-4 text-sm-end mt-3 mt-sm-0">
+        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Directory</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Profile & Quick Stats -->
+    <div class="col-md-4 col-lg-3 text-center">
+        <div class="content-card py-4 px-3">
+            @if (Model.StudentPhoto != null && Model.StudentPhoto.Length > 0)
+            {
+                var base64 = Convert.ToBase64String(Model.StudentPhoto);
+                var imgSrc = $"data:image/png;base64,{base64}";
+                <img src="@imgSrc" class="student-photo-large mb-3" alt="Student Photo" />
+            }
+            else
+            {
+                <div class="student-photo-large mb-3 d-inline-flex align-items-center justify-content-center bg-light text-muted">
+                    <i class="bi bi-person-fill display-1"></i>
+                </div>
+            }
+            <h4 class="fw-bold mb-1">@Model.FullName</h4>
+            <span class="badge @(Model.IsStudentActive ? "bg-success" : "bg-danger") mb-3">@(Model.IsStudentActive ? "Active Student" : "Inactive")</span>
+            
+            <div class="border-top pt-3 mt-3 text-start">
+                <div class="mb-2"><i class="bi bi-gender-ambiguous me-2 text-muted"></i>Gender: <strong>@Model.Gender</strong></div>
+                <div class="mb-2"><i class="bi bi-calendar2-week me-2 text-muted"></i>DOB: <strong>@Model.DateOfBirth.ToString("dd-MMM-yyyy")</strong></div>
+                <div><i class="bi bi-droplet-fill me-2 text-danger"></i>Blood Group: <strong>@(Model.BloodGroup ?? "N/A")</strong></div>
+            </div>
+            
+            <div class="mt-4 d-grid gap-2">
+                <a asp-action="Allocate" asp-route-id="@Model.StudentId" class="btn btn-outline-success btn-sm"><i class="bi bi-arrow-left-right me-1"></i> Allocate Class</a>
+                <a asp-action="Edit" asp-route-id="@Model.StudentId" class="btn btn-primary btn-sm"><i class="bi bi-pencil-fill me-1"></i> Edit Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Tab Detailed Information -->
+    <div class="col-md-8 col-lg-9">
+        <div class="content-card mb-4">
+            <div class="card-header-crimson">
+                <h5>Student & Parent Information</h5>
+            </div>
+            <div class="card-body-custom">
+                <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-person-badge-fill me-2"></i>Personal & Academic Info</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Place of Birth</label>
+                        <div class="fw-semibold">@(Model.PlaceOfBirth ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Nationality</label>
+                        <div class="fw-semibold">@(Model.Nationality ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Category</label>
+                        <div class="fw-semibold">@(Model.Category ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Religion</label>
+                        <div class="fw-semibold">@(Model.Religion ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Aadhaar Number</label>
+                        <div class="fw-semibold">@(Model.AadhaarNumber ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Email Address</label>
+                        <div class="fw-semibold">@(Model.EmailAddress ?? "-")</div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Previous School Name</label>
+                        <div class="fw-semibold">@(Model.PreviousSchoolName ?? "No previous schooling recorded")</div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-people-fill me-2"></i>Parent / Guardian Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Father's Name</label>
+                        <div class="fw-semibold">@Model.FatherName</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Father's Mobile</label>
+                        <div class="fw-semibold">@Model.FatherMobileNumber</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Father's Occupation</label>
+                        <div class="fw-semibold">@(Model.FatherOccupation ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Mother's Name</label>
+                        <div class="fw-semibold">@Model.MotherName</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Mother's Mobile</label>
+                        <div class="fw-semibold">@(Model.MotherMobileNumber ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Mother's Occupation</label>
+                        <div class="fw-semibold">@(Model.MotherOccupation ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Guardian Name</label>
+                        <div class="fw-semibold">@(Model.GuardianName ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Guardian Mobile</label>
+                        <div class="fw-semibold">@(Model.GuardianMobileNumber ?? "-")</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Emergency Contact</label>
+                        <div class="fw-semibold text-danger">@Model.EmergencyContactNumber</div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-geo-alt-fill me-2"></i>Address details</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Address Line 1</label>
+                        <div class="fw-semibold">@Model.AddressLine1</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Address Line 2</label>
+                        <div class="fw-semibold">@(Model.AddressLine2 ?? "-")</div>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">City</label>
+                        <div class="fw-semibold">@Model.City</div>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">State</label>
+                        <div class="fw-semibold">@Model.State</div>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Country</label>
+                        <div class="fw-semibold">@Model.Country</div>
+                    </div>
+                    <div class="col-md-4 col-lg-3">
+                        <label class="text-muted fs-8 text-uppercase fw-semibold mb-0">Pin Code</label>
+                        <div class="fw-semibold">@Model.PinCode</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allocation History Card -->
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Class Allocation History</h5>
+            </div>
+            <div class="card-body-custom p-0">
+                @if (historyList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Academic Year</th>
+                                    <th>Class Name</th>
+                                    <th>Division</th>
+                                    <th>Roll Number</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var h in historyList)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@h.MappingFinancialYear</td>
+                                        <td class="fw-semibold text-primary">@h.ClassName</td>
+                                        <td class="fw-semibold">@h.DivisionName</td>
+                                        <td class="fw-bold text-dark">@h.RollNo</td>
+                                        <td>
+                                            @if (h.IsCurrentMappingYear == true)
+                                            {
+                                                <span class="badge bg-success">Current Year</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Historical</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-clock-history fs-2"></i>
+                        <p class="mt-2">No historical class allocations found for this student.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

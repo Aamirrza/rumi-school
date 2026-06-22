@@ -1,0 +1,247 @@
+@model SchoolManagement.Domain.Entities.StudentInfo
+@{
+    ViewData["Title"] = "Student Admission Form";
+}
+
+<div class="content-card">
+    <div class="card-header-crimson">
+        <h5>New Student Registration</h5>
+        <a asp-action="Index" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left me-1"></i> Back</a>
+    </div>
+    <div class="card-body-custom">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- SECTION 1: BASIC & ACADEMIC INFO -->
+            <div class="card mb-4 border-0 bg-light p-3">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-mortarboard-fill me-2"></i>Registration & Academic Information</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="AdmissionDate" class="form-label fw-medium">Admission Date</label>
+                        <input asp-for="AdmissionDate" type="date" class="form-control" />
+                        <span asp-validation-for="AdmissionDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AdmissionFinancialYearId" class="form-label fw-medium">Admission Year</label>
+                        <select asp-for="AdmissionFinancialYearId" asp-items="ViewBag.FinancialYears" class="form-select">
+                            <option value="">-- Select Year --</option>
+                        </select>
+                        <span asp-validation-for="AdmissionFinancialYearId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium">Student Photo</label>
+                        <input type="file" name="studentPhoto" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: PERSONAL DETAILS -->
+            <div class="card mb-4 border-0 bg-light p-3">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-fill me-2"></i>Personal Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="FirstName" class="form-label fw-medium">First Name</label>
+                        <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="MiddleName" class="form-label fw-medium">Middle Name</label>
+                        <input asp-for="MiddleName" class="form-control" placeholder="Enter middle name" />
+                        <span asp-validation-for="MiddleName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="LastName" class="form-label fw-medium">Last Name</label>
+                        <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="DateOfBirth" class="form-label fw-medium">Date of Birth</label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Gender" class="form-label fw-medium">Gender</label>
+                        <select asp-for="Gender" asp-items="ViewBag.Genders" class="form-select">
+                            <option value="">-- Select Gender --</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="BloodGroup" class="form-label fw-medium">Blood Group</label>
+                        <select asp-for="BloodGroup" asp-items="ViewBag.BloodGroups" class="form-select">
+                            <option value="">-- Select Blood Group --</option>
+                        </select>
+                        <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Category" class="form-label fw-medium">Category</label>
+                        <select asp-for="Category" asp-items="ViewBag.Categories" class="form-select">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="Category" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Religion" class="form-label fw-medium">Religion</label>
+                        <input asp-for="Religion" class="form-control" placeholder="e.g. Hindu, Muslim..." />
+                        <span asp-validation-for="Religion" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="AadhaarNumber" class="form-label fw-medium">Aadhaar Number (12 digit)</label>
+                        <input asp-for="AadhaarNumber" class="form-control" maxlength="12" placeholder="Enter 12 digit Aadhaar" />
+                        <span asp-validation-for="AadhaarNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="PlaceOfBirth" class="form-label fw-medium">Place of Birth</label>
+                        <input asp-for="PlaceOfBirth" class="form-control" placeholder="City of birth" />
+                        <span asp-validation-for="PlaceOfBirth" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Nationality" class="form-label fw-medium">Nationality</label>
+                        <input asp-for="Nationality" class="form-control" />
+                        <span asp-validation-for="Nationality" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="EmailAddress" class="form-label fw-medium">Email Address</label>
+                        <input asp-for="EmailAddress" type="email" class="form-control" placeholder="student@example.com" />
+                        <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: ADDRESS DETAILS -->
+            <div class="card mb-4 border-0 bg-light p-3">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-geo-alt-fill me-2"></i>Address Information</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="AddressLine1" class="form-label fw-medium">Address Line 1</label>
+                        <input asp-for="AddressLine1" class="form-control" placeholder="House/Flat No, Apartment, Street" />
+                        <span asp-validation-for="AddressLine1" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AddressLine2" class="form-label fw-medium">Address Line 2</label>
+                        <input asp-for="AddressLine2" class="form-control" placeholder="Landmark, Locality" />
+                        <span asp-validation-for="AddressLine2" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="City" class="form-label fw-medium">City</label>
+                        <input asp-for="City" class="form-control" placeholder="Enter City" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="State" class="form-label fw-medium">State</label>
+                        <input asp-for="State" class="form-control" placeholder="Enter State" />
+                        <span asp-validation-for="State" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Country" class="form-label fw-medium">Country</label>
+                        <input asp-for="Country" class="form-control" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="PinCode" class="form-label fw-medium">Pin Code</label>
+                        <input asp-for="PinCode" class="form-control" placeholder="6-digit ZIP" />
+                        <span asp-validation-for="PinCode" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: PARENT / GUARDIAN DETAILS -->
+            <div class="card mb-4 border-0 bg-light p-3">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-people-fill me-2"></i>Parent & Guardian Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="FatherName" class="form-label fw-medium">Father's Name</label>
+                        <input asp-for="FatherName" class="form-control" placeholder="Father's full name" />
+                        <span asp-validation-for="FatherName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="FatherMobileNumber" class="form-label fw-medium">Father's Mobile Number</label>
+                        <input asp-for="FatherMobileNumber" class="form-control" placeholder="Mobile" />
+                        <span asp-validation-for="FatherMobileNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="FatherOccupation" class="form-label fw-medium">Father's Occupation</label>
+                        <input asp-for="FatherOccupation" class="form-control" placeholder="Occupation" />
+                        <span asp-validation-for="FatherOccupation" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MotherName" class="form-label fw-medium">Mother's Name</label>
+                        <input asp-for="MotherName" class="form-control" placeholder="Mother's full name" />
+                        <span asp-validation-for="MotherName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="MotherMobileNumber" class="form-label fw-medium">Mother's Mobile Number</label>
+                        <input asp-for="MotherMobileNumber" class="form-control" placeholder="Mobile (Optional)" />
+                        <span asp-validation-for="MotherMobileNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="MotherOccupation" class="form-label fw-medium">Mother's Occupation</label>
+                        <input asp-for="MotherOccupation" class="form-control" placeholder="Occupation (Optional)" />
+                        <span asp-validation-for="MotherOccupation" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="GuardianName" class="form-label fw-medium">Guardian Name (If not parents)</label>
+                        <input asp-for="GuardianName" class="form-control" placeholder="Guardian name" />
+                        <span asp-validation-for="GuardianName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="GuardianMobileNumber" class="form-label fw-medium">Guardian Mobile Number</label>
+                        <input asp-for="GuardianMobileNumber" class="form-control" placeholder="Guardian Mobile" />
+                        <span asp-validation-for="GuardianMobileNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="EmergencyContactNumber" class="form-label fw-medium text-danger">Emergency Contact Number</label>
+                        <input asp-for="EmergencyContactNumber" class="form-control" placeholder="Emergency Mobile" />
+                        <span asp-validation-for="EmergencyContactNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: PREVIOUS SCHOOL -->
+            <div class="card mb-4 border-0 bg-light p-3">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-clock-history me-2"></i>Academic History</h6>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="PreviousSchoolName" class="form-label fw-medium">Previous School Details (Name, Address, Class)</label>
+                        <input asp-for="PreviousSchoolName" class="form-control" placeholder="e.g. St. Xaviers, Class 2" />
+                        <span asp-validation-for="PreviousSchoolName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: INITIAL CLASS ALLOCATION (OPTIONAL) -->
+            <div class="card mb-4 border-0 bg-light p-3 border-start border-success border-4">
+                <h6 class="fw-bold text-success mb-3"><i class="bi bi-arrow-left-right me-2"></i>Initial Class Allocation (Optional)</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Class & Division</label>
+                        <select name="classScheduleId" asp-items="ViewBag.ClassSchedules" class="form-select">
+                            <option value="">-- Do Not Allocate Yet --</option>
+                        </select>
+                        <div class="form-text fs-8">Assign to class immediately. You can also allocate later.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Roll Number</label>
+                        <input type="number" name="rollNo" class="form-control" min="1" max="1000" placeholder="e.g. 1" />
+                        <div class="form-text fs-8">Required if Class is selected. Must be unique in class schedule.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4">Save & Admit Student</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

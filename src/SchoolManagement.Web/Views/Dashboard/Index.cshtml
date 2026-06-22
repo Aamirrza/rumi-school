@@ -1,0 +1,208 @@
+@model SchoolManagement.Domain.Models.DashboardData
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Dashboard Filter & Header -->
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h3 class="fw-bold mb-1">Overview Summary</h3>
+        <p class="text-muted mb-0">Metrics for Academic Year: <span class="badge bg-primary fs-7 px-3">@Model.SelectedFinancialYear</span></p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <form id="fyForm" method="get" asp-action="Index" class="d-inline-block text-start" style="min-width: 200px;">
+            <label class="form-label text-muted fs-8 mb-1 fw-medium text-uppercase" style="font-size: 0.7rem;">Change Financial Year</label>
+            <select name="financialYearId" asp-items="ViewBag.FinancialYears" class="form-select" onchange="this.form.submit()"></select>
+        </form>
+    </div>
+</div>
+
+<!-- Stats Counters -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card admitted-card shadow" style="border-left-width: 8px; transform: scale(1.03);">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label text-success fw-bold">Admitted Students</div>
+                    <div class="stat-value text-success" style="font-size: 2.75rem; font-weight: 800;">@Model.Metrics.TotalAdmittedStudents</div>
+                </div>
+                <div class="stat-icon text-success" style="font-size: 2.5rem;">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+            </div>
+            <div class="text-success-emphasis fw-medium fs-7 mt-2"><i class="bi bi-shield-check me-1"></i>Total registered in portal</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Mapped Students</div>
+                    <div class="stat-value">@Model.Metrics.TotalMappedStudents</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+            <div class="text-muted fs-7 mt-2">Allocated for selected FY</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card classes-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Active Classes</div>
+                    <div class="stat-value">@Model.Metrics.TotalActiveClasses</div>
+                </div>
+                <div class="stat-icon text-warning">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                </div>
+            </div>
+            <div class="text-muted fs-7 mt-2">Class configurations</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card capacity-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-label">Total Capacity</div>
+                    <div class="stat-value">@Model.Metrics.TotalCapacity</div>
+                </div>
+                <div class="stat-icon text-primary">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+            </div>
+            <div class="text-muted fs-7 mt-2">Combined seat capacity</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Class Student Distribution -->
+    <div class="col-lg-8">
+        <div class="content-card h-100">
+            <div class="card-header-crimson">
+                <h5>Student Distribution by Class</h5>
+            </div>
+            <div class="card-body-custom">
+                @if (Model.ClassDistribution.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Class Name</th>
+                                    <th>Capacity Usage</th>
+                                    <th class="text-end" style="width: 150px;">Student Count / Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ClassDistribution)
+                                {
+                                    var percent = item.MaxCapacity > 0 ? (double)item.StudentCount / item.MaxCapacity * 100 : 0;
+                                    var barColorClass = percent > 90 ? "bg-danger" : percent > 50 ? "bg-primary" : "bg-success";
+                                    <tr>
+                                        <td class="fw-semibold">@item.ClassName</td>
+                                        <td>
+                                            <div class="progress" style="height: 10px; border-radius: 5px;">
+                                                <div class="progress-bar @barColorClass" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-medium">
+                                            @item.StudentCount <span class="text-muted">/ @item.MaxCapacity</span>
+                                            <span class="ms-1 fs-8 text-muted">(@percent.ToString("0.0")%)</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2"></i>
+                        <p class="mt-2">No class distribution records available for this Academic Year.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Gender Distribution -->
+        <div class="content-card mb-4">
+            <div class="card-header-crimson">
+                <h5>Gender Distribution</h5>
+            </div>
+            <div class="card-body-custom">
+                @if (Model.GenderDistribution.Any())
+                {
+                    var totalGenderCount = Model.GenderDistribution.Sum(g => g.StudentCount);
+                    @foreach (var gender in Model.GenderDistribution)
+                    {
+                        var genderPercent = totalGenderCount > 0 ? (double)gender.StudentCount / totalGenderCount * 100 : 0;
+                        var colorClass = gender.Gender == "Male" ? "bg-primary" : gender.Gender == "Female" ? "bg-danger" : "bg-warning";
+                        var icon = gender.Gender == "Male" ? "bi-gender-male" : gender.Gender == "Female" ? "bi-gender-female" : "bi-gender-ambiguous";
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold"><i class="bi @icon me-2 text-muted"></i>@gender.Gender</span>
+                                <span class="fw-medium text-dark">@gender.StudentCount (@genderPercent.ToString("0.0")%)</span>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar @colorClass" role="progressbar" style="width: @genderPercent%;" aria-valuenow="@genderPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-people fs-2"></i>
+                        <p class="mt-2">No gender metrics found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Division Distribution -->
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Division Distribution</h5>
+            </div>
+            <div class="card-body-custom">
+                @if (Model.DivisionDistribution.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Division</th>
+                                    <th class="text-end">Students</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var div in Model.DivisionDistribution)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">Division @div.DivisionName</td>
+                                        <td class="text-end fw-semibold text-primary">@div.StudentCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-columns fs-2"></i>
+                        <p class="mt-2">No division records available.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

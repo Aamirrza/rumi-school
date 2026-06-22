@@ -1,0 +1,94 @@
+@model SchoolManagement.Web.Models.StudentAllocationModel
+@{
+    ViewData["Title"] = "Allocate Class";
+    var historyList = ViewBag.History as IEnumerable<SchoolManagement.Domain.Entities.StudentDetailsView> ?? new List<SchoolManagement.Domain.Entities.StudentDetailsView>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Allocate Class for @ViewBag.StudentName</h5>
+                <a asp-action="Details" asp-route-id="@Model.StudentId" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Profile</a>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="Allocate" method="post">
+                    <input type="hidden" asp-for="StudentId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- ALLOCATION FORM -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label asp-for="ClassScheduleId" class="form-label fw-medium">Class Schedule (Class - Div - Year)</label>
+                            <select asp-for="ClassScheduleId" asp-items="ViewBag.ClassSchedules" class="form-select">
+                                <option value="">-- Select Class --</option>
+                            </select>
+                            <span asp-validation-for="ClassScheduleId" class="text-danger"></span>
+                            <div class="form-text fs-8">Assign to class schedule. Make sure there is available capacity.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="RollNo" class="form-label fw-medium">Roll Number</label>
+                            <input asp-for="RollNo" type="number" class="form-control" placeholder="e.g. 1" min="1" max="1000" />
+                            <span asp-validation-for="RollNo" class="text-danger"></span>
+                            <div class="form-text fs-8">Must be unique in selected class.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mb-4">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Allocation</button>
+                    </div>
+                </form>
+
+                <!-- Allocation History Details -->
+                <h6 class="fw-bold text-muted border-top pt-3 mb-3">Current Mappings & Allocation History</h6>
+                @if (historyList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle fs-7">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Academic Year</th>
+                                    <th>Class Name</th>
+                                    <th>Division</th>
+                                    <th>Roll Number</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var h in historyList)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@h.MappingFinancialYear</td>
+                                        <td class="text-primary fw-semibold">@h.ClassName</td>
+                                        <td>@h.DivisionName</td>
+                                        <td class="fw-bold">@h.RollNo</td>
+                                        <td>
+                                            @if (h.IsCurrentMappingYear == true)
+                                            {
+                                                <span class="badge bg-success">Current Year</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Historical</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info border-0 mb-0 py-2 fs-7">
+                        <i class="bi bi-info-circle-fill me-1"></i> No prior allocations found.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,122 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.StudentDetailsView>
+@{
+    ViewData["Title"] = "Student Directory";
+}
+
+<!-- Search & Filter Card -->
+<div class="content-card mb-4">
+    <div class="card-header-crimson">
+        <h5>Search & Filter Students</h5>
+        <a asp-action="Create" class="btn btn-sm btn-primary"><i class="bi bi-person-plus-fill me-1"></i> Admit Student</a>
+    </div>
+    <div class="card-body-custom">
+        <form method="get" asp-action="Index">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-medium text-muted">Search Text</label>
+                    <input type="text" name="searchText" value="@ViewBag.SearchText" class="form-control" placeholder="Name, GR No, Aadhaar..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium text-muted">Class Schedule</label>
+                    <select name="classScheduleId" asp-items="ViewBag.ClassSchedules" class="form-select">
+                        <option value="">-- All Classes --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium text-muted">Academic Year</label>
+                    <select name="financialYearId" asp-items="ViewBag.FinancialYears" class="form-select">
+                        <option value="">-- All Years --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium text-muted">Gender</label>
+                    <select name="gender" asp-items="ViewBag.Genders" class="form-select">
+                        <option value="">-- All --</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Students Grid/Table -->
+<div class="content-card">
+    <div class="card-header-crimson">
+        <h5>Admitted Students</h5>
+    </div>
+    <div class="card-body-custom p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-custom table-datatable">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">Photo</th>
+                            <th>GR No</th>
+                            <th>Student Name</th>
+                            <th>Gender</th>
+                            <th>Date of Birth</th>
+                            <th>Class Assigned</th>
+                            <th>Roll No</th>
+                            <th class="text-end" style="width: 240px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (item.StudentPhoto != null && item.StudentPhoto.Length > 0)
+                                    {
+                                        var base64 = Convert.ToBase64String(item.StudentPhoto);
+                                        var imgSrc = $"data:image/png;base64,{base64}";
+                                        <img src="@imgSrc" class="student-avatar-img" alt="Student Photo" />
+                                    }
+                                    else
+                                    {
+                                        <div class="student-avatar-img d-flex align-items-center justify-content-center bg-light text-muted">
+                                            <i class="bi bi-person-fill fs-5"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="fw-semibold">@item.GrNo</td>
+                                <td class="fw-bold text-primary">@item.FullName</td>
+                                <td>@item.Gender</td>
+                                <td>@item.DateOfBirth.ToString("dd-MMM-yyyy")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ClassName))
+                                    {
+                                        <span>@item.ClassName - Div @item.DivisionName</span>
+                                        <br/>
+                                        <span class="fs-8 text-muted">(@item.MappingFinancialYear)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-warning fw-medium">Unallocated</span>
+                                    }
+                                </td>
+                                <td class="fw-bold">@(item.RollNo?.ToString() ?? "-")</td>
+                                <td class="text-end">
+                                    <a asp-action="Allocate" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-success me-1" title="Allocate Class"><i class="bi bi-arrow-left-right"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye-fill text-dark"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash-fill"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-2"></i>
+                <p class="mt-2">No students found matching the selected criteria.</p>
+            </div>
+        }
+    </div>
+</div>

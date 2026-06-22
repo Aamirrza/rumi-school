@@ -1,0 +1,53 @@
+@model SchoolManagement.Domain.Entities.ClassSchedule
+@{
+    ViewData["Title"] = "Edit Class Schedule";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Edit Class Schedule</h5>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="ClassScheduleId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ClassId" class="form-label fw-medium text-muted">Class (Read-only)</label>
+                        <select asp-for="ClassId" asp-items="ViewBag.Classes" class="form-select" disabled></select>
+                        <input type="hidden" asp-for="ClassId" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DivisionId" class="form-label fw-medium text-muted">Division (Read-only)</label>
+                        <select asp-for="DivisionId" asp-items="ViewBag.Divisions" class="form-select" disabled></select>
+                        <input type="hidden" asp-for="DivisionId" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FinancialYearId" class="form-label fw-medium text-muted">Academic Year (Read-only)</label>
+                        <select asp-for="FinancialYearId" asp-items="ViewBag.FinancialYears" class="form-select" disabled></select>
+                        <input type="hidden" asp-for="FinancialYearId" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MaxCapacity" class="form-label fw-medium">Class Student Capacity</label>
+                        <input asp-for="MaxCapacity" type="number" class="form-control" min="1" max="1000" />
+                        <span asp-validation-for="MaxCapacity" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

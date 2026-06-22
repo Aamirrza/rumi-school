@@ -1,0 +1,20 @@
+# Build & Output Folders
+bin/
+obj/
+publish/
+SchoolManagementApp/
+
+# IDE / User Settings
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Database & temp files
+*.log
+*.tmp
+database/*.bak
+database/*.mdf
+database/*.ldf
