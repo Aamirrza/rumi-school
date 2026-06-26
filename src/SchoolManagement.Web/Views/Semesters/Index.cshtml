@@ -1,0 +1,86 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.SemesterMaster>
+@{
+    ViewData["Title"] = "Semester Configurations";
+}
+
+<div class="row">
+    <!-- Semester List -->
+    <div class="col-md-7">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Active Semesters</h5>
+            </div>
+            <div class="card-body-custom p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Semester ID</th>
+                                <th>Semester Name</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No semesters configured yet.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>#@item.SemesterID</td>
+                                        <td class="fw-bold text-primary">@item.SemesterName</td>
+                                        <td>
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="badge-active">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge-inactive">Inactive</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <form asp-action="Delete" asp-route-id="@item.SemesterID" method="post" onsubmit="return confirm('Are you sure you want to delete this semester?');" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash-fill"></i> Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Semester Config -->
+    <div class="col-md-5">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Configure New Semester</h5>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Semester Name</label>
+                        <input name="SemesterName" type="text" class="form-control" placeholder="e.g. Semester 1, Semester 2" required maxlength="30" />
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input name="IsActive" value="true" type="checkbox" class="form-check-input" id="semActiveSwitch" checked />
+                            <label class="form-check-label" for="semActiveSwitch">Is Active</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Semester</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -10,9 +10,12 @@ namespace SchoolManagement.Domain.Entities
         public int FinancialYearId { get; set; }
         public int MaxCapacity { get; set; }
 
+        public int? StaffId { get; set; }
+
         // Navigation properties
         public virtual ClassMaster? ClassMaster { get; set; }
         public virtual DivisionMaster? DivisionMaster { get; set; }
         public virtual FinancialYear? FinancialYear { get; set; }
+        public virtual StaffDetail? Staff { get; set; }
     }
 }

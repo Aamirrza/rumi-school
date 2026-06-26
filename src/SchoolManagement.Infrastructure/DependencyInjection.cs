@@ -24,6 +24,9 @@ namespace SchoolManagement.Infrastructure
             services.AddScoped<IClassScheduleRepository, ClassScheduleRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
+            services.AddScoped<IFeeRepository, FeeRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
 
             // Register Services
             services.AddScoped<IAuthService, AuthService>();
@@ -33,6 +36,9 @@ namespace SchoolManagement.Infrastructure
             services.AddScoped<IClassScheduleService, ClassScheduleService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<IFeeService, FeeService>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
             return services;
         }

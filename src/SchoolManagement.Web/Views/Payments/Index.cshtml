@@ -1,0 +1,175 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.StudentPaymentsView>
+@{
+    ViewData["Title"] = "Student Payments";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5><i class="bi bi-cash-coin me-2"></i>All Payment Records</h5>
+            </div>
+            <div class="card-body-custom p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Receipt #</th>
+                                <th>Student</th>
+                                <th>GR No</th>
+                                <th>Financial Year</th>
+                                <th>Semester</th>
+                                <th>Payment Date</th>
+                                <th>Mode</th>
+                                <th>Transaction Ref</th>
+                                <th>Amount Paid (₹)</th>
+                                <th>Remaining Fee (₹)</th>
+                                <th>Installment</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">#@item.PaymentDetailID</td>
+                                    <td>
+                                        <a asp-action="StudentLedger" asp-route-studentId="@item.StudentID" class="text-primary text-decoration-none fw-medium">
+                                            @item.StudentFullName
+                                        </a>
+                                    </td>
+                                    <td><span class="badge bg-secondary">@item.GrNo</span></td>
+                                    <td>@item.FinancialYear</td>
+                                    <td class="fw-bold">@item.SemesterName</td>
+                                    <td>@item.CreatedDate.ToString("dd-MMM-yyyy HH:mm")</td>
+                                    <td>
+                                        @{
+                                            var modeClass = item.PaymentMode switch
+                                            {
+                                                "Cash" => "bg-info text-dark",
+                                                "UPI" => "bg-primary",
+                                                "Card" => "bg-dark",
+                                                "NetBanking" => "bg-secondary",
+                                                "Cheque" => "bg-warning text-dark",
+                                                _ => "bg-secondary"
+                                            };
+                                        }
+                                        <span class="badge @modeClass">@item.PaymentMode</span>
+                                    </td>
+                                    <td class="text-muted">@(item.TransactionRef ?? "-")</td>
+                                    <td class="fw-bold text-success">₹ @item.FeePaid.ToString("N2")</td>
+                                    <td class="fw-bold @(item.FeeRemaining > 0 ? "text-danger" : "text-muted")">₹ @item.FeeRemaining.ToString("N2")</td>
+                                    <td>@item.TotalInstallment</td>
+                                    <td>
+                                        @if (item.IsFullyPaid)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Fully Paid</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i>Partial</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            @if (!string.IsNullOrEmpty(item.Transactionphoto))
+                                            {
+                                                <button class="btn btn-outline-primary btn-sm" onclick="viewReceiptPhoto('@item.Transactionphoto')" title="View Receipt">
+                                                    <i class="bi bi-file-earmark-image"></i>
+                                                </button>
+                                            }
+                                            <a asp-action="StudentLedger" asp-route-studentId="@item.StudentID" class="btn btn-outline-info btn-sm" title="View Student Ledger">
+                                                <i class="bi bi-journal-text"></i>
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@item.PaymentDetailID" method="post" class="d-inline" onsubmit="return confirmDelete(this);">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Payment">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt photo preview modal -->
+<div class="modal fade" id="receiptPhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Receipt Photo Attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="receiptPreviewImg" src="" class="img-fluid border" alt="Receipt Photo" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#paymentsTable').DataTable({
+                pageLength: 25,
+                order: [[5, 'desc']], // Sort by Payment Date descending
+                dom: '<"row mb-3"<"col-md-6"B><"col-md-6"f>>rt<"row mt-3"<"col-md-5"i><"col-md-7"p>>',
+                buttons: [
+                    { 
+                        extend: 'excel', 
+                        className: 'btn btn-sm btn-outline-success', 
+                        text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    },
+                    { 
+                        extend: 'pdf', 
+                        className: 'btn btn-sm btn-outline-danger', 
+                        text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    },
+                    { 
+                        extend: 'print', 
+                        className: 'btn btn-sm btn-outline-secondary', 
+                        text: '<i class="bi bi-printer me-1"></i> Print',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    }
+                ],
+                columnDefs: [
+                    { orderable: false, targets: [12] } // Disable sorting on Actions column
+                ]
+            });
+        });
+
+        function viewReceiptPhoto(base64Str) {
+            var myModal = new bootstrap.Modal(document.getElementById('receiptPhotoModal'));
+            document.getElementById('receiptPreviewImg').src = 'data:image/jpeg;base64,' + base64Str;
+            myModal.show();
+        }
+
+        function confirmDelete(form) {
+            Swal.fire({
+                title: 'Delete Payment?',
+                text: "This will permanently remove this payment record.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+    </script>
+}

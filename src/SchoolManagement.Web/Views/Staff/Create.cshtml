@@ -1,0 +1,117 @@
+@model SchoolManagement.Domain.Entities.StaffDetail
+@{
+    ViewData["Title"] = "Add Staff Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Add New Staff Profile</h5>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <h6 class="border-bottom pb-2 mb-3 text-secondary text-uppercase fs-7 fw-bold" style="letter-spacing: 0.5px;">Personal Information</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="StaffFirstName" class="form-label fw-medium">First Name</label>
+                            <input asp-for="StaffFirstName" class="form-control" placeholder="First Name" />
+                            <span asp-validation-for="StaffFirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="StaffMiddleName" class="form-label fw-medium">Middle Name</label>
+                            <input asp-for="StaffMiddleName" class="form-control" placeholder="Middle Name" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="StaffLastName" class="form-label fw-medium">Last Name</label>
+                            <input asp-for="StaffLastName" class="form-control" placeholder="Last Name" />
+                            <span asp-validation-for="StaffLastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="StaffType" class="form-label fw-medium">Staff Role</label>
+                            <select asp-for="StaffType" asp-items="ViewBag.StaffTypes" class="form-select">
+                                <option value="">-- Select Role Type --</option>
+                            </select>
+                            <span asp-validation-for="StaffType" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="DOB" class="form-label fw-medium">Date of Birth</label>
+                            <input asp-for="DOB" type="date" class="form-control" />
+                            <span asp-validation-for="DOB" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Profile Photo</label>
+                            <input type="file" name="staffPicFile" class="form-control" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 text-secondary text-uppercase fs-7 fw-bold mt-4" style="letter-spacing: 0.5px;">Contact Details</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Mobileno" class="form-label fw-medium">Primary Mobile No</label>
+                            <input asp-for="Mobileno" class="form-control" placeholder="e.g. 9876543210" />
+                            <span asp-validation-for="Mobileno" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EmergencyContact" class="form-label fw-medium">Emergency Mobile No</label>
+                            <input asp-for="EmergencyContact" class="form-control" placeholder="Emergency Contact" />
+                            <span asp-validation-for="EmergencyContact" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-medium">Residential Address</label>
+                        <textarea asp-for="Address" class="form-control" rows="2" placeholder="Full Address"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 text-secondary text-uppercase fs-7 fw-bold mt-4" style="letter-spacing: 0.5px;">Verification & Financials</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="AadhaarNo" class="form-label fw-medium">Aadhaar Number (12 digits)</label>
+                            <input asp-for="AadhaarNo" class="form-control" maxlength="12" placeholder="Aadhaar No" />
+                            <span asp-validation-for="AadhaarNo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="PanNo" class="form-label fw-medium">PAN Card Number</label>
+                            <input asp-for="PanNo" class="form-control" placeholder="PAN No" />
+                            <span asp-validation-for="PanNo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="BankName" class="form-label fw-medium">Bank Name</label>
+                            <input asp-for="BankName" class="form-control" placeholder="Bank Name" />
+                            <span asp-validation-for="BankName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="AccountNo" class="form-label fw-medium">Bank Account Number</label>
+                            <input asp-for="AccountNo" class="form-control" placeholder="Account No" />
+                            <span asp-validation-for="AccountNo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="IFSCCode" class="form-label fw-medium">Bank IFSC Code</label>
+                            <input asp-for="IFSCCode" class="form-control" placeholder="IFSC Code" />
+                            <span asp-validation-for="IFSCCode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

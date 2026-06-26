@@ -32,6 +32,21 @@
                         <input type="hidden" asp-for="FinancialYearId" />
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Staff Type</label>
+                        <select id="StaffTypeId" asp-items="ViewBag.StaffTypes" class="form-select">
+                            <option value="">-- Select Staff Type --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="StaffId" class="form-label fw-medium">Class Teacher</label>
+                        <select asp-for="StaffId" asp-items="ViewBag.Staff" class="form-select">
+                            <option value="">-- Select Class Teacher --</option>
+                        </select>
+                        <span asp-validation-for="StaffId" class="text-danger"></span>
+                    </div>
+
                     <div class="mb-4">
                         <label asp-for="MaxCapacity" class="form-label fw-medium">Class Student Capacity</label>
                         <input asp-for="MaxCapacity" type="number" class="form-control" min="1" max="1000" />
@@ -50,4 +65,29 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('#StaffTypeId').change(function () {
+                var staffTypeId = $(this).val();
+                var $staffSelect = $('#StaffId');
+                
+                $staffSelect.empty();
+                $staffSelect.append('<option value="">-- Select Class Teacher --</option>');
+                
+                $.ajax({
+                    url: '@Url.Action("GetStaffByStaffType", "ClassSchedules")',
+                    type: 'GET',
+                    data: { staffTypeId: staffTypeId },
+                    success: function (data) {
+                        $.each(data, function (index, item) {
+                            $staffSelect.append($('<option></option>').val(item.value).text(item.text));
+                        });
+                    },
+                    error: function () {
+                        alert('Error loading staff.');
+                    }
+                });
+            });
+        });
+    </script>
 }

@@ -130,3 +130,61 @@ The web app interface is styled with a custom **Crimson Red & Deep Velvet Burgun
 * **Typography**: Outfit Google Font via custom styling rules in `site.css`.
 * **Layout**: Flexible grid/flex layouts with premium glassmorphism card panels.
 * **Micro-Animations**: Clean, responsive hover scales on side nav links and action buttons to keep the application feeling responsive and premium.
+
+---
+
+## 6. Phase 2 Features (Staff, Fee, and Payments Management)
+
+Phase 2 introduces comprehensive support for administrative configurations (Staff, Semesters, Fees) and financial workflows (Payments).
+
+### 6.1. Staff Management
+*   **Domain Representation**: `StaffDetail` and `StaffTypeMaster`.
+*   **Key Operations**: Add, Edit, Delete, and View staff members. Staff are assigned to class schedules to represent class teachers.
+
+### 6.2. Fee Configurations
+*   **Tables**: `FeeMaster` (stores base fee amounts), `SemesterMaster` (e.g., "Sem-1", "Sem-2"), and `FeeDetail` (maps fees and semesters to classes for a specific Financial Year).
+*   **SP Integration**: `usp_Dropdown_GetAvailableFeesForClass` yields available class fees for selection during fee collection. It returns the full set of columns mapped to the C# `FeeDetailsView` entity.
+
+### 6.3. Payments CRUD & Student Ledger
+*   **Full CRUD Workflow**:
+    *   **Index (All Payments)**: Accessible via the sidebar "Student Payments" link. Lists all payment receipts in the system with DataTables-powered filtering, sorting, and export capabilities (Excel, PDF, Print). Features a receipt photo modal preview.
+    *   **Student Ledger**: Visualizes a student's entire fee transaction history and balances. Accessible via the student directory or details screen.
+    *   **Payment Collection (Collect)**: Allows selecting a class-configured semester fee, choosing payment mode (Cash, UPI, Card, NetBanking, Cheque), adding a transaction reference, and uploading a receipt photo (which is stored as a Base64 string in `PaymentDetail`).
+    *   **Delete**: Soft-deletes payment records using `usp_PaymentDetail_Delete` and logs the delete operation in `AuditLogs`.
+
+### 6.4. Pending Fees Dashboard & Reporting Page
+*   **Reorganized KPI Cards Grid**:
+    *   Rebuilt the statistics block on the main dashboard to use a cohesive 4 + 4 layout.
+    *   **Top Row**: Admitted Students, Mapped Students, Active Classes, Total Capacity.
+    *   **Bottom Row**: Total Staff, Fees Collected, **Pending Fee Students** (clickable card), **Pending Fees (Amount)** (clickable card).
+    *   Clicking either of the pending fees cards navigates directly to the outstanding report page.
+*   **Outstanding Reporting Page (`/Payments/PendingReport`)**:
+    *   Displays all students with remaining balances for the active financial year.
+    *   Includes Class and Semester select filters.
+    *   Lists the student details, assigned class teacher (`StaffName` resolved via stored procedure join), and fee totals (expected, paid, and remaining balance).
+    *   Includes print styles that automatically exclude sidebar, navigation, filters, and action columns to generate clean print formats.
+    *   Provides direct "Collect Fee" redirect triggers to collect payments for specific students.
+
+---
+
+## 7. Database Deployment Guide
+
+To deploy or rebuild the database to a clean, error-free state, run the SQL scripts located in the `database/` and `scratch/` directories in the following order:
+
+### 7.1. Database Setup Sequence
+1.  **[01_create_database.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/01_create_database.sql)**: Drops the existing `SMS` database if present and initializes a clean one.
+2.  **[02_create_tables.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/02_create_tables.sql)**: Sets up tables for Financial Years, Class/Divisions, Students, Staff, Fees, and Payments.
+3.  **[03_create_constraints.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/03_create_constraints.sql)**: Adds foreign keys and check constraints.
+4.  **[04_create_indexes.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/04_create_indexes.sql)**: Implements filtered unique indexes.
+5.  **[05_seed_data.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/05_seed_data.sql)**: Seeds default users, academic configurations, staff, classes, divisions, and demo students.
+6.  **[06_functions.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/06_functions.sql)**: Declares utility functions.
+7.  **[07_views.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/07_views.sql)**: Creates base reporting views.
+8.  **[08_create_stored_procedures.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/08_create_stored_procedures.sql)**: Sets up core stored procedures.
+9.  **[09_staff_and_fees_procedures.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/database/09_staff_and_fees_procedures.sql)**: Registers staff, fee schedules, and payment stored procedures.
+10. **[alter_photo_to_binary.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/scratch/alter_photo_to_binary.sql)**: Alters the photo column to binary, updates student views/procedures, and modifies `usp_Student_Save` to allow manual user-provided GR Numbers with duplicate validation.
+
+### 7.2. Alternate: Fast Patch Script
+If the base database is already seeded, you can deploy the newest Phase 2 features directly using:
+*   **[deploy_payment_fixes.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/scratch/deploy_payment_fixes.sql)**: Deploys SPs for the Payments Index, soft delete operations, and dropdown list fixes.
+*   **[alter_photo_to_binary.sql](file:///C:/Users/Steve/.gemini/antigravity/scratch/sms-mvc/scratch/alter_photo_to_binary.sql)**: Integrates manual GR entry rules and binary photo processing.
+

@@ -517,3 +517,39 @@ body {
     margin-left: 0;
   }
 }
+
+/* Print optimizations to prevent truncation of wide tables */
+@media print {
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 8pt !important;
+  }
+  .app-sidebar, .sidebar-toggle, .btn-group, .dt-buttons, .dataTables_filter, .dataTables_length, .dataTables_paginate, .dataTables_info, .main-header, .sidebar-footer, header, footer, form, .btn, .d-print-none {
+    display: none !important;
+  }
+  .app-container, .main-content, .content-card, .card-body-custom, .app-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: static !important;
+  }
+  table.table-custom, table.dataTable {
+    width: 100% !important;
+    margin: 0 !important;
+    table-layout: fixed !important;
+    word-break: break-all !important;
+  }
+  table.table-custom th, table.table-custom td {
+    padding: 4px 6px !important;
+    font-size: 8pt !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  /* Exclude Actions column on browser printing */
+  table.table-custom th:last-child,
+  table.table-custom td:last-child {
+    display: none !important;
+  }
+}

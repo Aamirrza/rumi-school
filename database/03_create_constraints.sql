@@ -46,6 +46,50 @@ ALTER TABLE UserRoles
     ADD CONSTRAINT FK_UserRoles_Roles_RoleId 
     FOREIGN KEY (RoleId) REFERENCES Roles(RoleId);
 
+-- ClassSchedules -> StaffDetail
+ALTER TABLE ClassSchedules
+    ADD CONSTRAINT FK_ClassSchedules_StaffDetail_StaffId
+    FOREIGN KEY (StaffId) REFERENCES StaffDetail(StaffID);
+
+-- FeeDetail Foreign Keys
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FeeMaster_FeeId
+    FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_ClassMaster_ClassId
+    FOREIGN KEY (ClassID) REFERENCES ClassMaster(ClassId);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FinancialYears_FinancialYearId
+    FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_SemesterMaster_SemesterId
+    FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+
+-- PaymentDetail Foreign Keys
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_Students_StudentId
+    FOREIGN KEY (StudentID) REFERENCES StudentInfo(StudentId);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FinancialYears_FinancialYearId
+    FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FeeMaster_FeeId
+    FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_SemesterMaster_SemesterId
+    FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+
+-- StaffDetail -> StaffTypeMaster
+ALTER TABLE StaffDetail
+    ADD CONSTRAINT FK_StaffDetail_StaffTypeMaster_StaffType
+    FOREIGN KEY (StaffType) REFERENCES StaffTypeMaster(StaffTypeID);
+
 
 -- ============================================================================
 -- 2. CHECK CONSTRAINTS
@@ -70,5 +114,23 @@ ALTER TABLE StudentInfo
 ALTER TABLE AuditLogs
     ADD CONSTRAINT CK_AuditLogs_OperationType 
     CHECK (OperationType IN ('INSERT', 'UPDATE', 'DELETE'));
+
+-- FeeMaster Fee Check
+ALTER TABLE FeeMaster
+    ADD CONSTRAINT CK_FeeMaster_Fee
+    CHECK (Fee >= 0);
+
+-- PaymentDetail Checks
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_FeePaid
+    CHECK (FeePaid >= 0);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_TotalInstallment
+    CHECK (TotalInstallment > 0);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_PaymentMode
+    CHECK (PaymentMode IN ('Cash', 'Card', 'UPI', 'NetBanking', 'Cheque'));
 GO
 

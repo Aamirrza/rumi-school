@@ -80,6 +80,7 @@ CREATE TABLE ClassSchedules (
     DivisionId INT NOT NULL,
     FinancialYearId INT NOT NULL,
     MaxCapacity INT NOT NULL,
+    StaffId INT NULL,
     
     -- Global Audit Columns
     CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
@@ -238,6 +239,119 @@ CREATE TABLE AuditLogs (
     IsActive BIT NOT NULL DEFAULT 1,
     IsDeleted BIT NOT NULL DEFAULT 0
 );
+-- 11. SemesterMaster Table
+CREATE TABLE SemesterMaster (
+    SemesterID INT IDENTITY(1,1) PRIMARY KEY,
+    SemesterName NVARCHAR(30) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 12. FeeMaster Table
+CREATE TABLE FeeMaster (
+    FeeID INT IDENTITY(1,1) PRIMARY KEY,
+    Fee DECIMAL(18,2) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 13. FeeDetail Table
+CREATE TABLE FeeDetail (
+    FeeDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    FeeID INT NOT NULL,
+    ClassID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    SemesterID INT NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 14. PaymentDetail Table
+CREATE TABLE PaymentDetail (
+    PaymentDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    StudentID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    FeeID INT NOT NULL,
+    PaymentMode VARCHAR(12) NOT NULL,
+    TransactionRef NVARCHAR(50) NULL,
+    Transactionphoto NVARCHAR(MAX) NULL, -- stores base64 string
+    IsFullyPaid BIT NOT NULL DEFAULT 0,
+    SemesterID INT NOT NULL,
+    FeePaid DECIMAL(18,2) NOT NULL,
+    TotalInstallment INT NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 15. StaffTypeMaster Table
+CREATE TABLE StaffTypeMaster (
+    StaffTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffType NVARCHAR(50) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 16. StaffDetail Table
+CREATE TABLE StaffDetail (
+    StaffID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffFirstName NVARCHAR(50) NOT NULL,
+    StaffMiddleName NVARCHAR(50) NULL,
+    StaffLastName NVARCHAR(50) NOT NULL,
+    StaffType INT NOT NULL,
+    Mobileno VARCHAR(15) NOT NULL,
+    EmergencyContact VARCHAR(15) NOT NULL,
+    Address NVARCHAR(255) NOT NULL,
+    AadhaarNo VARCHAR(12) NOT NULL,
+    BankName NVARCHAR(50) NOT NULL,
+    IFSCCode NVARCHAR(20) NOT NULL,
+    AccountNo NVARCHAR(20) NOT NULL,
+    PanNo NVARCHAR(20) NOT NULL,
+    StaffPic NVARCHAR(MAX) NULL, -- stores base64 string
+    DOB DATE NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
 GO
 
 
@@ -290,6 +404,50 @@ ALTER TABLE dbo.UserRoles
     ADD CONSTRAINT FK_UserRoles_Roles_RoleId
     FOREIGN KEY (RoleId) REFERENCES dbo.Roles (RoleId);
 
+-- ClassSchedules -> StaffDetail
+ALTER TABLE dbo.ClassSchedules
+    ADD CONSTRAINT FK_ClassSchedules_StaffDetail_StaffId
+    FOREIGN KEY (StaffId) REFERENCES dbo.StaffDetail(StaffID);
+
+-- FeeDetail Foreign Keys
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FeeMaster_FeeId
+    FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_ClassMaster_ClassId
+    FOREIGN KEY (ClassID) REFERENCES ClassMaster(ClassId);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FinancialYears_FinancialYearId
+    FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_SemesterMaster_SemesterId
+    FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+
+-- PaymentDetail Foreign Keys
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_Students_StudentId
+    FOREIGN KEY (StudentID) REFERENCES StudentInfo(StudentId);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FinancialYears_FinancialYearId
+    FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FeeMaster_FeeId
+    FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_SemesterMaster_SemesterId
+    FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+
+-- StaffDetail -> StaffTypeMaster
+ALTER TABLE StaffDetail
+    ADD CONSTRAINT FK_StaffDetail_StaffTypeMaster_StaffType
+    FOREIGN KEY (StaffType) REFERENCES StaffTypeMaster(StaffTypeID);
+
 -- CHECK CONSTRAINTS
 ALTER TABLE dbo.FinancialYear
     ADD CONSTRAINT CK_FinancialYears_Dates
@@ -306,6 +464,24 @@ ALTER TABLE dbo.StudentInfo
 ALTER TABLE dbo.AuditLogs
     ADD CONSTRAINT CK_AuditLogs_OperationType
     CHECK (OperationType IN ('INSERT', 'UPDATE', 'DELETE'));
+
+-- FeeMaster Fee Check
+ALTER TABLE dbo.FeeMaster
+    ADD CONSTRAINT CK_FeeMaster_Fee
+    CHECK (Fee >= 0);
+
+-- PaymentDetail Checks
+ALTER TABLE dbo.PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_FeePaid
+    CHECK (FeePaid >= 0);
+
+ALTER TABLE dbo.PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_TotalInstallment
+    CHECK (TotalInstallment > 0);
+
+ALTER TABLE dbo.PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_PaymentMode
+    CHECK (PaymentMode IN ('Cash', 'Card', 'UPI', 'NetBanking', 'Cheque'));
 GO
 
 
@@ -430,7 +606,8 @@ GO
 -- ============================================================================
 -- STEP 6: VIEWS CREATION
 -- ============================================================================
-
+IF OBJECT_ID('vw_ActiveClassSchedules', 'V') IS NOT NULL DROP VIEW vw_ActiveClassSchedules;
+GO
 CREATE VIEW vw_ActiveClassSchedules
 AS
 SELECT 
@@ -443,6 +620,8 @@ SELECT
     fy.FinancialYear AS FinancialYear,
     fy.IsCurrent AS IsCurrentFinancialYear,
     cs.MaxCapacity,
+    cs.StaffId,
+    (s.StaffFirstName + ' ' + ISNULL(s.StaffMiddleName + ' ', '') + s.StaffLastName) AS StaffFullName,
     cs.IsActive,
     cs.CreatedDate,
     cs.CreatedBy,
@@ -452,9 +631,12 @@ FROM ClassSchedules cs
 INNER JOIN ClassMaster c ON cs.ClassId = c.ClassId AND c.IsDeleted = 0 AND c.IsActive = 1
 INNER JOIN DivisionMaster d ON cs.DivisionId = d.DivisionId AND d.IsDeleted = 0 AND d.IsActive = 1
 INNER JOIN FinancialYear fy ON cs.FinancialYearId = fy.FinancialYearId AND fy.IsDeleted = 0 AND fy.IsActive = 1
+LEFT JOIN StaffDetail s ON cs.StaffId = s.StaffID AND s.IsDeleted = 0
 WHERE cs.IsDeleted = 0 AND cs.IsActive = 1;
 GO
 
+IF OBJECT_ID('vw_StudentDetails', 'V') IS NOT NULL DROP VIEW vw_StudentDetails;
+GO
 CREATE VIEW vw_StudentDetails
 AS
 SELECT 
@@ -1221,6 +1403,8 @@ BEGIN
         FinancialYear,
         IsCurrentFinancialYear,
         MaxCapacity,
+        StaffId,
+        StaffFullName,
         IsActive,
         CreatedDate,
         CreatedBy,
@@ -1246,6 +1430,8 @@ BEGIN
         FinancialYear,
         IsCurrentFinancialYear,
         MaxCapacity,
+        StaffId,
+        StaffFullName,
         IsActive,
         CreatedDate,
         CreatedBy,
@@ -1262,6 +1448,7 @@ CREATE PROCEDURE usp_ClassSchedule_Save
     @DivisionId INT,
     @FinancialYearId INT,
     @MaxCapacity INT,
+    @StaffId INT = NULL,
     @PerformedBy INT,
     @IPAddress VARCHAR(50) = NULL
 AS
@@ -1306,6 +1493,14 @@ BEGIN
             RETURN;
         END
 
+        IF @StaffId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM StaffDetail WHERE StaffID = @StaffId AND IsDeleted = 0 AND IsActive = 1)
+        BEGIN
+            SET @StatusCode = 400;
+            SET @Message = 'Selected Staff is invalid or inactive.';
+            SELECT @StatusCode AS StatusCode, @Message AS Message;
+            RETURN;
+        END
+
         IF EXISTS (
             SELECT 1 FROM ClassSchedules 
             WHERE FinancialYearId = @FinancialYearId 
@@ -1327,8 +1522,8 @@ BEGIN
         BEGIN
             SET @OperationType = 'INSERT';
 
-            INSERT INTO ClassSchedules (ClassId, DivisionId, FinancialYearId, MaxCapacity, CreatedBy)
-            VALUES (@ClassId, @DivisionId, @FinancialYearId, @MaxCapacity, @PerformedBy);
+            INSERT INTO ClassSchedules (ClassId, DivisionId, FinancialYearId, MaxCapacity, StaffId, CreatedBy)
+            VALUES (@ClassId, @DivisionId, @FinancialYearId, @MaxCapacity, @StaffId, @PerformedBy);
 
             SET @ClassScheduleId = SCOPE_IDENTITY();
         END
@@ -1350,6 +1545,7 @@ BEGIN
                 DivisionId = @DivisionId,
                 FinancialYearId = @FinancialYearId,
                 MaxCapacity = @MaxCapacity,
+                StaffId = @StaffId,
                 UpdatedDate = SYSUTCDATETIME(),
                 UpdatedBy = @PerformedBy
             WHERE ClassScheduleId = @ClassScheduleId;
@@ -1524,6 +1720,7 @@ GO
 
 CREATE PROCEDURE usp_Student_Save
     @StudentId INT,
+    @GrNo VARCHAR(20),
     @AdmissionDate DATE,
     @FirstName VARCHAR(50),
     @MiddleName VARCHAR(50) = NULL,
@@ -1573,7 +1770,6 @@ BEGIN
     DECLARE @OperationType VARCHAR(10) = 'UPDATE';
     DECLARE @OldValues NVARCHAR(MAX) = NULL;
     DECLARE @NewValues NVARCHAR(MAX) = NULL;
-    DECLARE @GrNo VARCHAR(20) = NULL;
 
     BEGIN TRY
         IF @DateOfBirth >= CAST(SYSUTCDATETIME() AS DATE)
@@ -1680,7 +1876,16 @@ BEGIN
         IF @StudentId IS NULL OR @StudentId = 0
         BEGIN
             SET @OperationType = 'INSERT';
-            SET @GrNo = dbo.fn_GenerateGrNo(@AdmissionFinancialYearId);
+
+            -- Check for duplicate GR Number
+            IF EXISTS (SELECT 1 FROM StudentInfo WHERE GrNo = @GrNo AND IsDeleted = 0)
+            BEGIN
+                IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                SET @StatusCode = 400;
+                SET @Message = 'GR Number already exists.';
+                SELECT @StatusCode AS StatusCode, @Message AS Message;
+                RETURN;
+            END
 
             INSERT INTO StudentInfo (
                 GrNo, AdmissionDate, FirstName, MiddleName, LastName, DateOfBirth, Gender, StudentPhoto,
@@ -1703,8 +1908,7 @@ BEGIN
         END
         ELSE
         BEGIN
-            SELECT @GrNo = GrNo FROM StudentInfo WHERE StudentId = @StudentId AND IsDeleted = 0;
-            IF @GrNo IS NULL
+            IF NOT EXISTS (SELECT 1 FROM StudentInfo WHERE StudentId = @StudentId AND IsDeleted = 0)
             BEGIN
                 IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
                 SET @StatusCode = 404;
@@ -1717,6 +1921,7 @@ BEGIN
 
             UPDATE StudentInfo
             SET AdmissionDate = @AdmissionDate,
+                GrNo = @GrNo,
                 FirstName = @FirstName,
                 MiddleName = @MiddleName,
                 LastName = @LastName,
@@ -1882,12 +2087,47 @@ BEGIN
         WHERE IsCurrent = 1 AND IsDeleted = 0;
     END
 
+    -- Calculate pending fees details for the selected Financial Year
+    DECLARE @TotalPendingStudents INT = 0;
+    DECLARE @TotalPendingAmount DECIMAL(18,2) = 0.00;
+
+    ;WITH PendingFeesCTE AS (
+        SELECT 
+            sm.StudentId,
+            (fm.Fee - ISNULL(paid.TotalPaid, 0)) AS Remaining
+        FROM StudentMappings sm
+        INNER JOIN ClassSchedules cs ON sm.ClassScheduleId = cs.ClassScheduleId AND cs.IsDeleted = 0 AND cs.IsActive = 1
+        INNER JOIN FeeDetail fd ON cs.ClassId = fd.ClassID AND fd.FinancialYearID = sm.FinancialYearId AND fd.IsDeleted = 0 AND fd.IsActive = 1
+        INNER JOIN FeeMaster fm ON fd.FeeID = fm.FeeID AND fm.IsDeleted = 0
+        LEFT JOIN (
+            SELECT StudentID, FinancialYearID, FeeID, SemesterID, SUM(FeePaid) AS TotalPaid
+            FROM PaymentDetail
+            WHERE IsDeleted = 0
+            GROUP BY StudentID, FinancialYearID, FeeID, SemesterID
+        ) paid ON sm.StudentId = paid.StudentID 
+              AND sm.FinancialYearId = paid.FinancialYearID 
+              AND fd.FeeID = paid.FeeID 
+              AND fd.SemesterID = paid.SemesterID
+        WHERE sm.FinancialYearId = @FinancialYearId AND sm.IsDeleted = 0 AND sm.IsActive = 1
+          AND (fm.Fee - ISNULL(paid.TotalPaid, 0)) > 0
+    )
+    SELECT 
+        @TotalPendingStudents = COUNT(DISTINCT StudentId),
+        @TotalPendingAmount = ISNULL(SUM(Remaining), 0)
+    FROM PendingFeesCTE;
+
+    -- 1. Main KPI summaries (admitted students, active schedules, capacity, staff count, collection figures)
     SELECT 
         (SELECT COUNT(DISTINCT StudentId) FROM StudentMappings WHERE FinancialYearId = @FinancialYearId AND IsDeleted = 0 AND IsActive = 1) AS TotalMappedStudents,
         (SELECT COUNT(1) FROM ClassSchedules WHERE FinancialYearId = @FinancialYearId AND IsDeleted = 0 AND IsActive = 1) AS TotalActiveClasses,
         (SELECT ISNULL(SUM(MaxCapacity), 0) FROM ClassSchedules WHERE FinancialYearId = @FinancialYearId AND IsDeleted = 0 AND IsActive = 1) AS TotalCapacity,
-        (SELECT COUNT(1) FROM StudentInfo WHERE IsDeleted = 0 AND IsActive = 1) AS TotalAdmittedStudents;
+        (SELECT COUNT(1) FROM StudentInfo WHERE IsDeleted = 0 AND IsActive = 1) AS TotalAdmittedStudents,
+        (SELECT COUNT(1) FROM StaffDetail WHERE IsDeleted = 0 AND IsActive = 1) AS TotalStaff,
+        (SELECT ISNULL(SUM(FeePaid), 0) FROM PaymentDetail WHERE FinancialYearID = @FinancialYearId AND IsDeleted = 0) AS TotalFeesCollected,
+        ISNULL(@TotalPendingStudents, 0) AS TotalPendingFeesStudents,
+        ISNULL(@TotalPendingAmount, 0) AS TotalPendingFeesAmount;
 
+    -- 2. Gender distribution
     SELECT 
         s.Gender, 
         COUNT(1) AS StudentCount
@@ -1896,6 +2136,7 @@ BEGIN
     WHERE sm.FinancialYearId = @FinancialYearId AND sm.IsDeleted = 0 AND sm.IsActive = 1
     GROUP BY s.Gender;
 
+    -- 3. Classroom capacity vs student count
     SELECT 
         cs.ClassName,
         COUNT(sm.StudentId) AS StudentCount,
@@ -1906,6 +2147,7 @@ BEGIN
     GROUP BY cs.ClassScheduleId, cs.ClassName, cs.MaxCapacity
     ORDER BY cs.ClassName;
 
+    -- 4. Division wise distribution
     SELECT 
         cs.DivisionName,
         COUNT(sm.StudentId) AS StudentCount
@@ -1914,6 +2156,15 @@ BEGIN
     WHERE cs.FinancialYearId = @FinancialYearId
     GROUP BY cs.DivisionName
     ORDER BY cs.DivisionName;
+
+    -- 5. Staff distribution by role type
+    SELECT 
+        st.StaffType,
+        COUNT(sd.StaffID) AS StaffCount
+    FROM StaffTypeMaster st
+    LEFT JOIN StaffDetail sd ON st.StaffTypeID = sd.StaffType AND sd.IsDeleted = 0 AND sd.IsActive = 1
+    WHERE st.IsDeleted = 0 AND st.IsActive = 1
+    GROUP BY st.StaffTypeID, st.StaffType;
 END;
 GO
 

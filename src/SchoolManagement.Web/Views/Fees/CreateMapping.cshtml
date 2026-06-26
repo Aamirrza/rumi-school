@@ -1,0 +1,60 @@
+@model SchoolManagement.Domain.Entities.FeeDetail
+@{
+    ViewData["Title"] = "Add Fee Mapping";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Map Class Fee Structure</h5>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="CreateMapping" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ClassID" class="form-label fw-medium">Class</label>
+                        <select asp-for="ClassID" asp-items="ViewBag.Classes" class="form-select">
+                            <option value="">-- Select Class --</option>
+                        </select>
+                        <span asp-validation-for="ClassID" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SemesterID" class="form-label fw-medium">Semester</label>
+                        <select asp-for="SemesterID" asp-items="ViewBag.Semesters" class="form-select">
+                            <option value="">-- Select Semester --</option>
+                        </select>
+                        <span asp-validation-for="SemesterID" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FinancialYearID" class="form-label fw-medium">Academic Year</label>
+                        <select asp-for="FinancialYearID" asp-items="ViewBag.FinancialYears" class="form-select">
+                            <option value="">-- Select Year --</option>
+                        </select>
+                        <span asp-validation-for="FinancialYearID" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="FeeID" class="form-label fw-medium">Select Fee Structure Amount (₹)</label>
+                        <select asp-for="FeeID" asp-items="ViewBag.Fees" class="form-select">
+                            <option value="">-- Select Fee --</option>
+                        </select>
+                        <span asp-validation-for="FeeID" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Mappings" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Structure</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -40,12 +40,13 @@ namespace SchoolManagement.Infrastructure.Repositories
         {
             var result = await _context.DbOperationResults
                 .FromSqlRaw(
-                    "EXEC usp_ClassSchedule_Save @ClassScheduleId, @ClassId, @DivisionId, @FinancialYearId, @MaxCapacity, @PerformedBy, @IPAddress",
+                    "EXEC usp_ClassSchedule_Save @ClassScheduleId, @ClassId, @DivisionId, @FinancialYearId, @MaxCapacity, @StaffId, @PerformedBy, @IPAddress",
                     new SqlParameter("@ClassScheduleId", entity.ClassScheduleId),
                     new SqlParameter("@ClassId", entity.ClassId),
                     new SqlParameter("@DivisionId", entity.DivisionId),
                     new SqlParameter("@FinancialYearId", entity.FinancialYearId),
                     new SqlParameter("@MaxCapacity", entity.MaxCapacity),
+                    new SqlParameter("@StaffId", entity.StaffId ?? (object)DBNull.Value),
                     new SqlParameter("@PerformedBy", performedBy),
                     new SqlParameter("@IPAddress", ipAddress ?? (object)DBNull.Value)
                 )

@@ -1,0 +1,77 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.FeeMaster>
+@{
+    ViewData["Title"] = "Fee Configurations";
+}
+
+<div class="row">
+    <!-- Fee List -->
+    <div class="col-md-7">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Fee Amount Structures</h5>
+                <a asp-action="Mappings" class="btn btn-sm btn-outline-light"><i class="bi bi-link-45deg me-1"></i> Class Fee Mappings</a>
+            </div>
+            <div class="card-body-custom p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Fee ID</th>
+                                <th>Fee Amount (₹)</th>
+                                <th>Configured Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>#@item.FeeID</td>
+                                    <td class="fw-bold text-primary">₹ @item.Fee.ToString("N2")</td>
+                                    <td>@item.CreatedDate.ToString("dd-MM-yyyy")</td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge-active">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-inactive">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Fee Config -->
+    <div class="col-md-5">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Configure New Fee</h5>
+            </div>
+            <div class="card-body-custom">
+                <form asp-action="CreateFeeMaster" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Fee Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input name="Fee" type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 5000.00" required />
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input name="IsActive" value="true" type="checkbox" class="form-check-input" id="feeActiveSwitch" checked />
+                            <label class="form-check-label" for="feeActiveSwitch">Is Active</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Config</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

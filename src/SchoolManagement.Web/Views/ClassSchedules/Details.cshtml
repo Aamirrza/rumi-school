@@ -31,6 +31,10 @@
                                 <td>@Model.FinancialYear</td>
                             </tr>
                             <tr>
+                                <th class="bg-light fw-semibold text-muted">Class Teacher</th>
+                                <td>@(string.IsNullOrEmpty(Model.StaffFullName) ? "Unassigned" : Model.StaffFullName)</td>
+                            </tr>
+                            <tr>
                                 <th class="bg-light fw-semibold text-muted">Max Capacity</th>
                                 <td>@Model.MaxCapacity</td>
                             </tr>

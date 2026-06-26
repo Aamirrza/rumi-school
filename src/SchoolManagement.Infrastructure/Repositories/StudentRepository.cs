@@ -52,7 +52,7 @@ namespace SchoolManagement.Infrastructure.Repositories
             var result = await _context.DbOperationResults
                 .FromSqlRaw(
                     "EXEC usp_Student_Save " +
-                    "@StudentId, @AdmissionDate, @FirstName, @MiddleName, @LastName, @DateOfBirth, @Gender, @StudentPhoto, " +
+                    "@StudentId, @GrNo, @AdmissionDate, @FirstName, @MiddleName, @LastName, @DateOfBirth, @Gender, @StudentPhoto, " +
                     "@PlaceOfBirth, @Nationality, @BloodGroup, @Category, @Religion, @AadhaarNumber, " +
                     "@AddressLine1, @AddressLine2, @City, @State, @Country, @PinCode, " +
                     "@FatherName, @FatherOccupation, @FatherMobileNumber, @MotherName, @MotherOccupation, @MotherMobileNumber, " +
@@ -60,6 +60,7 @@ namespace SchoolManagement.Infrastructure.Repositories
                     "@PreviousSchoolName, @AdmissionFinancialYearId, @EmailAddress, " +
                     "@ClassScheduleId, @RollNo, @PerformedBy, @IPAddress",
                     new SqlParameter("@StudentId", entity.StudentId),
+                    new SqlParameter("@GrNo", entity.GrNo ?? (object)DBNull.Value),
                     new SqlParameter("@AdmissionDate", entity.AdmissionDate),
                     new SqlParameter("@FirstName", entity.FirstName ?? (object)DBNull.Value),
                     new SqlParameter("@MiddleName", entity.MiddleName ?? (object)DBNull.Value),

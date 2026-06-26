@@ -45,7 +45,11 @@ namespace SchoolManagement.Infrastructure.Repositories
                                 TotalMappedStudents = Convert.ToInt32(reader["TotalMappedStudents"]),
                                 TotalActiveClasses = Convert.ToInt32(reader["TotalActiveClasses"]),
                                 TotalCapacity = Convert.ToInt32(reader["TotalCapacity"]),
-                                TotalAdmittedStudents = Convert.ToInt32(reader["TotalAdmittedStudents"])
+                                TotalAdmittedStudents = Convert.ToInt32(reader["TotalAdmittedStudents"]),
+                                TotalStaff = Convert.ToInt32(reader["TotalStaff"]),
+                                TotalFeesCollected = Convert.ToDecimal(reader["TotalFeesCollected"]),
+                                TotalPendingFeesStudents = Convert.ToInt32(reader["TotalPendingFeesStudents"]),
+                                TotalPendingFeesAmount = Convert.ToDecimal(reader["TotalPendingFeesAmount"])
                             };
                         }
 
@@ -88,6 +92,20 @@ namespace SchoolManagement.Infrastructure.Repositories
                                 {
                                     DivisionName = reader["DivisionName"].ToString(),
                                     StudentCount = Convert.ToInt32(reader["StudentCount"])
+                                });
+                            }
+                        }
+
+                        // 5. Result Set 5: Staff Role Distribution
+                        if (await reader.NextResultAsync())
+                        {
+                            data.StaffDistribution = new List<StaffRoleCount>();
+                            while (await reader.ReadAsync())
+                            {
+                                data.StaffDistribution.Add(new StaffRoleCount
+                                {
+                                    StaffType = reader["StaffType"].ToString(),
+                                    StaffCount = Convert.ToInt32(reader["StaffCount"])
                                 });
                             }
                         }

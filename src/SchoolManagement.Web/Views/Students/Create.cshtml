@@ -16,19 +16,24 @@
             <div class="card mb-4 border-0 bg-light p-3">
                 <h6 class="fw-bold text-primary mb-3"><i class="bi bi-mortarboard-fill me-2"></i>Registration & Academic Information</h6>
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label asp-for="AdmissionDate" class="form-label fw-medium">Admission Date</label>
                         <input asp-for="AdmissionDate" type="date" class="form-control" />
                         <span asp-validation-for="AdmissionDate" class="text-danger"></span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label asp-for="GrNo" class="form-label fw-medium">GR Number</label>
+                        <input asp-for="GrNo" type="text" class="form-control" placeholder="e.g. GR-001" required />
+                        <span asp-validation-for="GrNo" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
                         <label asp-for="AdmissionFinancialYearId" class="form-label fw-medium">Admission Year</label>
                         <select asp-for="AdmissionFinancialYearId" asp-items="ViewBag.FinancialYears" class="form-select">
                             <option value="">-- Select Year --</option>
                         </select>
                         <span asp-validation-for="AdmissionFinancialYearId" class="text-danger"></span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-medium">Student Photo</label>
                         <input type="file" name="studentPhoto" class="form-control" accept="image/*" />
                     </div>

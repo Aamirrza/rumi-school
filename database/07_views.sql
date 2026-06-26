@@ -6,6 +6,8 @@ GO
 -- 1. vw_ActiveClassSchedules
 -- Exposes all active class schedules joined with Class, Division, and Financial Year details.
 -- ============================================================================
+IF OBJECT_ID('vw_ActiveClassSchedules', 'V') IS NOT NULL DROP VIEW vw_ActiveClassSchedules;
+GO
 CREATE VIEW vw_ActiveClassSchedules
 AS
 SELECT 
@@ -18,6 +20,8 @@ SELECT
     fy.FinancialYear,
     fy.IsCurrent AS IsCurrentFinancialYear,
     cs.MaxCapacity,
+    cs.StaffId,
+    (s.StaffFirstName + ' ' + ISNULL(s.StaffMiddleName + ' ', '') + s.StaffLastName) AS StaffFullName,
     cs.IsActive,
     cs.CreatedDate,
     cs.CreatedBy,
@@ -27,6 +31,7 @@ FROM ClassSchedules cs
 INNER JOIN ClassMaster c ON cs.ClassId = c.ClassId AND c.IsDeleted = 0 AND c.IsActive = 1
 INNER JOIN DivisionMaster d ON cs.DivisionId = d.DivisionId AND d.IsDeleted = 0 AND d.IsActive = 1
 INNER JOIN FinancialYear fy ON cs.FinancialYearId = fy.FinancialYearId AND fy.IsDeleted = 0 AND fy.IsActive = 1
+LEFT JOIN StaffDetail s ON cs.StaffId = s.StaffID AND s.IsDeleted = 0
 WHERE cs.IsDeleted = 0 AND cs.IsActive = 1;
 GO
 
@@ -35,6 +40,8 @@ GO
 -- Exposes student profiles, including their active class mapping and current class/roll details.
 -- Supports students with or without current active class mappings (LEFT JOIN on mapping tables).
 -- ============================================================================
+IF OBJECT_ID('vw_StudentDetails', 'V') IS NOT NULL DROP VIEW vw_StudentDetails;
+GO
 CREATE VIEW vw_StudentDetails
 AS
 SELECT 

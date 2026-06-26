@@ -11,7 +11,6 @@
     <div class="card-body-custom">
         <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="StudentId" />
-            <input type="hidden" asp-for="GrNo" />
 
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -20,8 +19,9 @@
                 <h6 class="fw-bold text-primary mb-3"><i class="bi bi-mortarboard-fill me-2"></i>Registration & Academic Information</h6>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-medium text-muted">GR Number (Read-only)</label>
-                        <input class="form-control" value="@Model.GrNo" disabled />
+                        <label asp-for="GrNo" class="form-label fw-medium">GR Number</label>
+                        <input asp-for="GrNo" class="form-control" required />
+                        <span asp-validation-for="GrNo" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="AdmissionDate" class="form-label fw-medium">Admission Date</label>

@@ -16,17 +16,20 @@ namespace SchoolManagement.Web.Controllers
         private readonly IClassService _classService;
         private readonly IDivisionService _divisionService;
         private readonly IFinancialYearService _financialYearService;
+        private readonly IStaffService _staffService;
 
         public ClassSchedulesController(
             IClassScheduleService service,
             IClassService classService,
             IDivisionService divisionService,
-            IFinancialYearService financialYearService)
+            IFinancialYearService financialYearService,
+            IStaffService staffService)
         {
             _service = service;
             _classService = classService;
             _divisionService = divisionService;
             _financialYearService = financialYearService;
+            _staffService = staffService;
         }
 
         public async Task<IActionResult> Index()
@@ -94,7 +97,8 @@ namespace SchoolManagement.Web.Controllers
                 ClassId = viewItem.ClassId,
                 DivisionId = viewItem.DivisionId,
                 FinancialYearId = viewItem.FinancialYearId,
-                MaxCapacity = viewItem.MaxCapacity
+                MaxCapacity = viewItem.MaxCapacity,
+                StaffId = viewItem.StaffId
             };
 
             await PopulateDropdownsAsync(model);
@@ -166,15 +170,37 @@ namespace SchoolManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetStaffByStaffType(int? staffTypeId)
+        {
+            var staff = await _staffService.GetStaffDropdownAsync(staffTypeId);
+            return Json(staff.Select(s => new { value = s.StaffID, text = s.StaffFirstName }));
+        }
+
         private async Task PopulateDropdownsAsync(ClassSchedule? model = null)
         {
             var classes = await _classService.GetAllAsync();
             var divisions = await _divisionService.GetAllAsync();
             var financialYears = await _financialYearService.GetAllAsync();
+            var staffTypes = await _staffService.GetStaffTypesAsync();
+
+            int? selectedStaffTypeId = null;
+            if (model?.StaffId.HasValue == true && model.StaffId.Value > 0)
+            {
+                var staffObj = await _staffService.GetByIdAsync(model.StaffId.Value);
+                if (staffObj != null)
+                {
+                    selectedStaffTypeId = staffObj.StaffTypeID;
+                }
+            }
+
+            var staffList = await _staffService.GetStaffDropdownAsync(selectedStaffTypeId);
 
             ViewBag.Classes = new SelectList(classes, "ClassId", "ClassName", model?.ClassId);
             ViewBag.Divisions = new SelectList(divisions, "DivisionId", "DivisionName", model?.DivisionId);
             ViewBag.FinancialYears = new SelectList(financialYears, "FinancialYearId", "FinancialYearName", model?.FinancialYearId);
+            ViewBag.StaffTypes = new SelectList(staffTypes, "StaffTypeID", "StaffType", selectedStaffTypeId);
+            ViewBag.Staff = new SelectList(staffList, "StaffID", "StaffFirstName", model?.StaffId);
         }
 
         private bool TryGetCurrentUserId(out int userId)

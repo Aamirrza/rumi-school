@@ -21,15 +21,26 @@ namespace SchoolManagement.Infrastructure.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<SemesterMaster> Semesters { get; set; }
+        public DbSet<FeeMaster> Fees { get; set; }
+        public DbSet<FeeDetail> FeeDetails { get; set; }
+        public DbSet<PaymentDetail> PaymentDetails { get; set; }
+        public DbSet<StaffTypeMaster> StaffTypes { get; set; }
+        public DbSet<StaffDetail> StaffDetails { get; set; }
 
         // Views and Keyless Query Types
         public DbSet<ActiveClassScheduleView> ActiveClassSchedulesView { get; set; }
         public DbSet<StudentDetailsView> StudentDetailsView { get; set; }
+        public DbSet<StaffDetailsView> StaffDetailsView { get; set; }
+        public DbSet<FeeDetailsView> FeeDetailsView { get; set; }
+        public DbSet<StudentPaymentsView> StudentPaymentsView { get; set; }
         public DbSet<DbOperationResult> DbOperationResults { get; set; }
         public DbSet<DashboardSummaryMetrics> DashboardSummaryMetrics { get; set; }
         public DbSet<GenderDistribution> GenderDistributions { get; set; }
         public DbSet<ClassStudentCount> ClassStudentCounts { get; set; }
         public DbSet<DivisionStudentCount> DivisionStudentCounts { get; set; }
+        public DbSet<StaffRoleCount> StaffRoleCounts { get; set; }
+        public DbSet<PendingFeeReportView> PendingFeeReportView { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,15 +78,38 @@ namespace SchoolManagement.Infrastructure.Data
             modelBuilder.Entity<AuditLog>().ToTable("AuditLogs");
             modelBuilder.Entity<AuditLog>().HasKey(e => e.AuditLogId);
 
+            modelBuilder.Entity<SemesterMaster>().ToTable("SemesterMaster");
+            modelBuilder.Entity<SemesterMaster>().HasKey(e => e.SemesterID);
+
+            modelBuilder.Entity<FeeMaster>().ToTable("FeeMaster");
+            modelBuilder.Entity<FeeMaster>().HasKey(e => e.FeeID);
+
+            modelBuilder.Entity<FeeDetail>().ToTable("FeeDetail");
+            modelBuilder.Entity<FeeDetail>().HasKey(e => e.FeeDetailID);
+
+            modelBuilder.Entity<PaymentDetail>().ToTable("PaymentDetail");
+            modelBuilder.Entity<PaymentDetail>().HasKey(e => e.PaymentDetailID);
+
+            modelBuilder.Entity<StaffTypeMaster>().ToTable("StaffTypeMaster");
+            modelBuilder.Entity<StaffTypeMaster>().HasKey(e => e.StaffTypeID);
+
+            modelBuilder.Entity<StaffDetail>().ToTable("StaffDetail");
+            modelBuilder.Entity<StaffDetail>().HasKey(e => e.StaffID);
+
             // Keyless Entity Types
             modelBuilder.Entity<ActiveClassScheduleView>().HasNoKey().ToView("vw_ActiveClassSchedules");
             modelBuilder.Entity<StudentDetailsView>().HasNoKey().ToView("vw_StudentDetails");
+            modelBuilder.Entity<StaffDetailsView>().HasNoKey().ToView("vw_StaffDetails");
+            modelBuilder.Entity<FeeDetailsView>().HasNoKey().ToView("vw_FeeDetails");
+            modelBuilder.Entity<StudentPaymentsView>().HasNoKey().ToView("vw_StudentPayments");
             
             modelBuilder.Entity<DbOperationResult>().HasNoKey().Ignore(e => e.RecordId);
             modelBuilder.Entity<DashboardSummaryMetrics>().HasNoKey();
             modelBuilder.Entity<GenderDistribution>().HasNoKey();
             modelBuilder.Entity<ClassStudentCount>().HasNoKey();
             modelBuilder.Entity<DivisionStudentCount>().HasNoKey();
+            modelBuilder.Entity<StaffRoleCount>().HasNoKey();
+            modelBuilder.Entity<PendingFeeReportView>().HasNoKey();
         }
     }
 }

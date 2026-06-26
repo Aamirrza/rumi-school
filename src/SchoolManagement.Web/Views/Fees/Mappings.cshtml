@@ -1,0 +1,56 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.FeeDetailsView>
+@{
+    ViewData["Title"] = "Class Fee Structures";
+}
+
+<div class="content-card">
+    <div class="card-header-crimson">
+        <h5>Class Fee structures</h5>
+        <div>
+            <a asp-action="Index" class="btn btn-sm btn-outline-light me-1"><i class="bi bi-gear-fill me-1"></i> Fee Configs</a>
+            <a asp-action="CreateMapping" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Fee Structure</a>
+        </div>
+    </div>
+    <div class="card-body-custom p-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-datatable">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Semester</th>
+                        <th>Academic Year</th>
+                        <th>Fee Amount (₹)</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold text-primary">@item.ClassName</td>
+                            <td class="fw-bold">@item.SemesterName</td>
+                            <td>@item.FinancialYear</td>
+                            <td class="fw-bold text-dark">₹ @item.FeeAmount.ToString("N2")</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-inactive">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="DeleteMapping" asp-route-id="@item.FeeDetailID" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this structure mapping?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Mapping"><i class="bi bi-trash-fill"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

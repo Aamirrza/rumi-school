@@ -1,0 +1,68 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.StaffDetailsView>
+@{
+    ViewData["Title"] = "Staff Management";
+}
+
+<div class="content-card">
+    <div class="card-header-crimson">
+        <h5>Staff Profile Directory</h5>
+        <a asp-action="Create" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Staff Profile</a>
+    </div>
+    <div class="card-body-custom p-0">
+        <div class="table-responsive">
+            <table class="table table-custom table-datatable">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Role Type</th>
+                        <th>Mobile</th>
+                        <th>Aadhaar</th>
+                        <th>PAN No</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.StaffPic))
+                                {
+                                    <img src="data:image/jpeg;base64,@item.StaffPic" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" alt="Staff" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px; font-weight: bold;">
+                                        @item.StaffFirstName.Substring(0, Math.Min(1, item.StaffFirstName.Length))@item.StaffLastName.Substring(0, Math.Min(1, item.StaffLastName.Length))
+                                    </div>
+                                }
+                            </td>
+                            <td class="fw-semibold text-primary">@item.StaffFullName</td>
+                            <td>@item.StaffTypeName</td>
+                            <td>@item.Mobileno</td>
+                            <td>@item.AadhaarNo</td>
+                            <td>@item.PanNo</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-inactive">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@item.StaffID" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                <a asp-action="Details" asp-route-id="@item.StaffID" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye-fill text-dark"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.StaffID" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash-fill"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

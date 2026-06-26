@@ -110,6 +110,7 @@
                                     @if (User.IsInRole("Administrator") || User.IsInRole("Clerk"))
                                     {
                                         <a asp-action="Edit" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                        <a asp-controller="Payments" asp-action="StudentLedger" asp-route-studentId="@item.StudentId" class="btn btn-sm btn-outline-success me-1" title="Fee Payments"><i class="bi bi-cash-coin text-success"></i></a>
                                     }
                                     <a asp-action="Details" asp-route-id="@item.StudentId" class="btn btn-sm btn-outline-info me-1" title="Details"><i class="bi bi-eye-fill text-dark"></i></a>
                                     @if (User.IsInRole("Administrator"))

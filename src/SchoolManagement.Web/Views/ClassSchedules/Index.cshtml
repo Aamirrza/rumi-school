@@ -16,6 +16,7 @@
                         <th>Class Name</th>
                         <th>Division</th>
                         <th>Academic Year</th>
+                        <th>Class Teacher</th>
                         <th>Seat Capacity</th>
                         <th>Status</th>
                         <th class="text-end" style="width: 200px;">Actions</th>
@@ -28,6 +29,7 @@
                             <td class="fw-semibold text-primary">@item.ClassName</td>
                             <td class="fw-bold">@item.DivisionName</td>
                             <td>@item.FinancialYear</td>
+                            <td>@(string.IsNullOrEmpty(item.StaffFullName) ? "Unassigned" : item.StaffFullName)</td>
                             <td class="fw-semibold text-dark">@item.MaxCapacity</td>
                             <td>
                                 @if (item.IsActive)

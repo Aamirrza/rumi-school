@@ -13,6 +13,8 @@ namespace SchoolManagement.Domain.Entities
         public string FinancialYear { get; set; } = string.Empty;
         public bool IsCurrentFinancialYear { get; set; }
         public int MaxCapacity { get; set; }
+        public int? StaffId { get; set; }
+        public string? StaffFullName { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }

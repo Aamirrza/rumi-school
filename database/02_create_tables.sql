@@ -58,6 +58,7 @@ CREATE TABLE ClassSchedules (
     DivisionId INT NOT NULL,
     FinancialYearId INT NOT NULL,
     MaxCapacity INT NOT NULL,
+    StaffId INT NULL,
     
     -- Global Audit Columns
     CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
@@ -210,6 +211,121 @@ CREATE TABLE AuditLogs (
     CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     
     -- Global Audit Columns (including CreatedBy for standardized mapping)
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 11. SemesterMaster Table
+CREATE TABLE SemesterMaster (
+    SemesterID INT IDENTITY(1,1) PRIMARY KEY,
+    SemesterName NVARCHAR(30) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 12. FeeMaster Table
+CREATE TABLE FeeMaster (
+    FeeID INT IDENTITY(1,1) PRIMARY KEY,
+    Fee DECIMAL(18,2) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 13. FeeDetail Table
+CREATE TABLE FeeDetail (
+    FeeDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    FeeID INT NOT NULL,
+    ClassID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    SemesterID INT NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 14. PaymentDetail Table
+CREATE TABLE PaymentDetail (
+    PaymentDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    StudentID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    FeeID INT NOT NULL,
+    PaymentMode VARCHAR(12) NOT NULL,
+    TransactionRef NVARCHAR(50) NULL,
+    Transactionphoto NVARCHAR(MAX) NULL, -- stores base64 string
+    IsFullyPaid BIT NOT NULL DEFAULT 0,
+    SemesterID INT NOT NULL,
+    FeePaid DECIMAL(18,2) NOT NULL,
+    TotalInstallment INT NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 15. StaffTypeMaster Table
+CREATE TABLE StaffTypeMaster (
+    StaffTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffType NVARCHAR(50) NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+GO
+
+-- 16. StaffDetail Table
+CREATE TABLE StaffDetail (
+    StaffID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffFirstName NVARCHAR(50) NOT NULL,
+    StaffMiddleName NVARCHAR(50) NULL,
+    StaffLastName NVARCHAR(50) NOT NULL,
+    StaffType INT NOT NULL,
+    Mobileno VARCHAR(15) NOT NULL,
+    EmergencyContact VARCHAR(15) NOT NULL,
+    Address NVARCHAR(255) NOT NULL,
+    AadhaarNo VARCHAR(12) NOT NULL,
+    BankName NVARCHAR(50) NOT NULL,
+    IFSCCode NVARCHAR(20) NOT NULL,
+    AccountNo NVARCHAR(20) NOT NULL,
+    PanNo NVARCHAR(20) NOT NULL,
+    StaffPic NVARCHAR(MAX) NULL, -- stores base64 string
+    DOB DATE NOT NULL,
+    
+    -- Global Audit Columns
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     CreatedBy INT NOT NULL,
     UpdatedDate DATETIME2 NULL,
     UpdatedBy INT NULL,

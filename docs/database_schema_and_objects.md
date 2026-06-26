@@ -901,3 +901,390 @@ BEGIN
 END;
 GO
 ```
+
+---
+
+## 4. Phase 2 Schema Additions (Semester, Fee, Payment & Staff Management)
+
+The following tables and constraints were introduced in Phase 2 to manage fee structures, student payments, semesters, staff types, and staff records.
+
+### 4.1. Tables Creation
+
+```sql
+-- 11. SemesterMaster Table
+CREATE TABLE SemesterMaster (
+    SemesterID INT IDENTITY(1,1) PRIMARY KEY,
+    SemesterName NVARCHAR(30) NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+-- 12. FeeMaster Table
+CREATE TABLE FeeMaster (
+    FeeID INT IDENTITY(1,1) PRIMARY KEY,
+    Fee DECIMAL(18,2) NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+-- 13. FeeDetail Table
+CREATE TABLE FeeDetail (
+    FeeDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    FeeID INT NOT NULL,
+    ClassID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    SemesterID INT NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+-- 14. PaymentDetail Table
+CREATE TABLE PaymentDetail (
+    PaymentDetailID INT IDENTITY(1,1) PRIMARY KEY,
+    StudentID INT NOT NULL,
+    FinancialYearID INT NOT NULL,
+    FeeID INT NOT NULL,
+    PaymentMode VARCHAR(12) NOT NULL,
+    TransactionRef NVARCHAR(50) NULL,
+    Transactionphoto NVARCHAR(MAX) NULL, -- stores base64 string
+    IsFullyPaid BIT NOT NULL DEFAULT 0,
+    SemesterID INT NOT NULL,
+    FeePaid DECIMAL(18,2) NOT NULL,
+    TotalInstallment INT NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+-- 15. StaffTypeMaster Table
+CREATE TABLE StaffTypeMaster (
+    StaffTypeID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffType NVARCHAR(50) NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+
+-- 16. StaffDetail Table
+CREATE TABLE StaffDetail (
+    StaffID INT IDENTITY(1,1) PRIMARY KEY,
+    StaffFirstName NVARCHAR(50) NOT NULL,
+    StaffMiddleName NVARCHAR(50) NULL,
+    StaffLastName NVARCHAR(50) NOT NULL,
+    StaffType INT NOT NULL,
+    Mobileno VARCHAR(15) NOT NULL,
+    EmergencyContact VARCHAR(15) NOT NULL,
+    Address NVARCHAR(255) NOT NULL,
+    AadhaarNo VARCHAR(12) NOT NULL,
+    BankName NVARCHAR(50) NOT NULL,
+    IFSCCode NVARCHAR(20) NOT NULL,
+    AccountNo NVARCHAR(20) NOT NULL,
+    PanNo NVARCHAR(20) NOT NULL,
+    StaffPic NVARCHAR(MAX) NULL, -- stores base64 string
+    DOB DATE NOT NULL,
+    CreatedDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CreatedBy INT NOT NULL,
+    UpdatedDate DATETIME2 NULL,
+    UpdatedBy INT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+```
+
+### 4.2. Constraints
+
+```sql
+-- ClassSchedules -> StaffDetail
+ALTER TABLE ClassSchedules
+    ADD CONSTRAINT FK_ClassSchedules_StaffDetail_StaffId
+    FOREIGN KEY (StaffId) REFERENCES StaffDetail(StaffID);
+
+-- FeeDetail Constraints
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FeeMaster_FeeId FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_ClassMaster_ClassId FOREIGN KEY (ClassID) REFERENCES ClassMaster(ClassId);
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_FinancialYears_FinancialYearId FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+ALTER TABLE FeeDetail
+    ADD CONSTRAINT FK_FeeDetail_SemesterMaster_SemesterId FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+
+-- PaymentDetail Constraints
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_Students_StudentId FOREIGN KEY (StudentID) REFERENCES StudentInfo(StudentId);
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FinancialYears_FinancialYearId FOREIGN KEY (FinancialYearID) REFERENCES FinancialYear(FinancialYearId);
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_FeeMaster_FeeId FOREIGN KEY (FeeID) REFERENCES FeeMaster(FeeID);
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT FK_PaymentDetail_SemesterMaster_SemesterId FOREIGN KEY (SemesterID) REFERENCES SemesterMaster(SemesterID);
+ALTER TABLE PaymentDetail
+    ADD CONSTRAINT CK_PaymentDetail_PaymentMode CHECK (PaymentMode IN ('Cash', 'Card', 'UPI', 'NetBanking', 'Cheque'));
+
+-- StaffDetail Constraints
+ALTER TABLE StaffDetail
+    ADD CONSTRAINT FK_StaffDetail_StaffTypeMaster_StaffType FOREIGN KEY (StaffType) REFERENCES StaffTypeMaster(StaffTypeID);
+
+---
+
+## 5. Phase 2 Views & Stored Procedures
+
+### 5.1. Views
+
+```sql
+-- 1. vw_StaffDetails
+-- Exposes staff profiles along with their human-readable staff type name.
+CREATE VIEW vw_StaffDetails
+AS
+SELECT 
+    s.StaffID,
+    s.StaffFirstName,
+    s.StaffMiddleName,
+    s.StaffLastName,
+    (s.StaffFirstName + ' ' + ISNULL(s.StaffMiddleName + ' ', '') + s.StaffLastName) AS StaffFullName,
+    s.StaffType,
+    st.StaffType AS StaffTypeName,
+    s.Mobileno,
+    s.EmergencyContact,
+    s.Address,
+    s.AadhaarNo,
+    s.BankName,
+    s.IFSCCode,
+    s.AccountNo,
+    s.PanNo,
+    s.StaffPic,
+    s.DOB,
+    s.CreatedDate,
+    s.CreatedBy,
+    s.UpdatedDate,
+    s.UpdatedBy,
+    s.IsActive,
+    s.IsDeleted
+FROM StaffDetail s
+INNER JOIN StaffTypeMaster st ON s.StaffType = st.StaffTypeID
+WHERE s.IsDeleted = 0;
+GO
+
+-- 2. vw_FeeDetails
+-- Maps Class, Semesters, Financial Years to specific fees.
+CREATE VIEW vw_FeeDetails
+AS
+SELECT 
+    fd.FeeDetailID,
+    fd.FeeID,
+    fm.Fee AS FeeAmount,
+    fd.ClassID,
+    c.ClassName,
+    fd.FinancialYearID,
+    fy.FinancialYear,
+    fy.IsCurrent AS IsCurrentFinancialYear,
+    fd.SemesterID,
+    sem.SemesterName,
+    fd.IsActive
+FROM FeeDetail fd
+INNER JOIN FeeMaster fm ON fd.FeeID = fm.FeeID AND fm.IsDeleted = 0
+INNER JOIN ClassMaster c ON fd.ClassID = c.ClassId AND c.IsDeleted = 0
+INNER JOIN FinancialYear fy ON fd.FinancialYearID = fy.FinancialYearId AND fy.IsDeleted = 0
+INNER JOIN SemesterMaster sem ON fd.SemesterID = sem.SemesterID AND sem.IsDeleted = 0
+WHERE fd.IsDeleted = 0;
+GO
+
+-- 3. vw_StudentPayments
+-- Denormalized reporting of student payments, fees, classes and financial cycles.
+CREATE VIEW vw_StudentPayments
+AS
+SELECT 
+    pd.PaymentDetailID,
+    pd.StudentID,
+    (s.FirstName + ' ' + ISNULL(s.MiddleName + ' ', '') + s.LastName) AS StudentFullName,
+    s.GrNo,
+    pd.FinancialYearID,
+    fy.FinancialYear,
+    pd.FeeID,
+    fm.Fee AS TotalFeeAmount,
+    pd.PaymentMode,
+    pd.TransactionRef,
+    pd.Transactionphoto,
+    pd.IsFullyPaid,
+    pd.SemesterID,
+    sem.SemesterName,
+    pd.FeePaid,
+    pd.TotalInstallment,
+    pd.CreatedDate,
+    pd.IsActive,
+    pd.IsDeleted
+FROM PaymentDetail pd
+INNER JOIN StudentInfo s ON pd.StudentID = s.StudentId AND s.IsDeleted = 0
+INNER JOIN FinancialYear fy ON pd.FinancialYearID = fy.FinancialYearId AND fy.IsDeleted = 0
+INNER JOIN FeeMaster fm ON pd.FeeID = fm.FeeID AND fm.IsDeleted = 0
+INNER JOIN SemesterMaster sem ON pd.SemesterID = sem.SemesterID AND sem.IsDeleted = 0
+WHERE pd.IsDeleted = 0;
+GO
+```
+
+### 5.2. Stored Procedures
+
+```sql
+-- 1. Staff CRUD Operations
+CREATE PROCEDURE usp_StaffDetail_GetAll
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM vw_StaffDetails ORDER BY StaffFullName;
+END;
+GO
+
+CREATE PROCEDURE usp_StaffDetail_GetById
+    @StaffId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM vw_StaffDetails WHERE StaffID = @StaffId;
+END;
+GO
+
+CREATE PROCEDURE usp_StaffDetail_Save
+    @StaffId INT,
+    @StaffFirstName NVARCHAR(50),
+    @StaffMiddleName NVARCHAR(50) = NULL,
+    @StaffLastName NVARCHAR(50),
+    @StaffType INT,
+    @Mobileno VARCHAR(15),
+    @EmergencyContact VARCHAR(15),
+    @Address NVARCHAR(255),
+    @AadhaarNo VARCHAR(12),
+    @BankName NVARCHAR(50),
+    @IFSCCode NVARCHAR(20),
+    @AccountNo NVARCHAR(20),
+    @PanNo NVARCHAR(20),
+    @StaffPic NVARCHAR(MAX) = NULL,
+    @DOB DATE,
+    @PerformedBy INT,
+    @IPAddress VARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Validations, Begin Transaction, Insert/Update, Audit logging, Commit.
+    -- (Standard implementation logic applied)
+END;
+GO
+
+CREATE PROCEDURE usp_StaffDetail_Delete
+    @StaffId INT,
+    @PerformedBy INT,
+    @IPAddress VARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Soft-delete operation: set IsDeleted = 1, Audit logging.
+END;
+GO
+
+-- 2. Fee & Dropdown Queries
+CREATE PROCEDURE usp_Dropdown_GetStaff
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT StaffID, StaffFullName FROM vw_StaffDetails WHERE IsActive = 1 ORDER BY StaffFullName;
+END;
+GO
+
+CREATE PROCEDURE usp_Dropdown_GetAvailableFeesForClass
+    @ClassId INT,
+    @FinancialYearId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM vw_FeeDetails 
+    WHERE ClassID = @ClassId AND FinancialYearID = @FinancialYearId AND IsActive = 1
+    ORDER BY SemesterName;
+END;
+GO
+
+-- 3. Payments CRUD Operations
+CREATE PROCEDURE usp_PaymentDetail_GetByStudent
+    @StudentId INT,
+    @FinancialYearId INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM vw_StudentPayments
+    WHERE StudentID = @StudentId 
+      AND (@FinancialYearId IS NULL OR FinancialYearID = @FinancialYearId)
+    ORDER BY CreatedDate DESC;
+END;
+GO
+
+CREATE PROCEDURE usp_PaymentDetail_GetAll
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * FROM vw_StudentPayments ORDER BY CreatedDate DESC;
+END;
+GO
+
+CREATE PROCEDURE usp_PaymentDetail_Save
+    @PaymentDetailId INT,
+    @StudentID INT,
+    @FinancialYearID INT,
+    @FeeID INT,
+    @PaymentMode VARCHAR(12),
+    @TransactionRef NVARCHAR(50) = NULL,
+    @Transactionphoto NVARCHAR(MAX) = NULL,
+    @IsFullyPaid BIT,
+    @SemesterID INT,
+    @FeePaid DECIMAL(18,2),
+    @TotalInstallment INT,
+    @PerformedBy INT,
+    @IPAddress VARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Validations, Begin Transaction, Insert/Update, Audit logging, Commit.
+    -- (Standard implementation logic applied)
+END;
+GO
+
+CREATE PROCEDURE usp_PaymentDetail_Delete
+    @PaymentDetailId INT,
+    @PerformedBy INT,
+    @IPAddress VARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Soft-delete transaction: Set IsDeleted = 1, write AuditLogs.
+END;
+GO
+
+-- 6. Stored Procedure: Retrieve students with pending fees
+CREATE PROCEDURE usp_Report_GetPendingFees
+    @ClassId INT = NULL,
+    @SemesterId INT = NULL,
+    @FinancialYearId INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Selects students with outstanding fee balances for a given Semester and Class,
+    -- joining with StaffDetail to retrieve the class teacher's full name (StaffName).
+END;
+GO
+```
+

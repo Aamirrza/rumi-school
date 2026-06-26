@@ -1,0 +1,189 @@
+@model IEnumerable<SchoolManagement.Domain.Entities.StudentPaymentsView>
+@{
+    var student = (SchoolManagement.Domain.Entities.StudentDetailsView)ViewBag.Student;
+    ViewData["Title"] = $"Fee Summary - {student.FullName}";
+}
+
+<div class="row">
+    <!-- Student Header Details Card -->
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-uppercase small fw-bold text-white-50">Student Ledger Profile</span>
+                    <h3 class="mb-1">@student.FullName</h3>
+                    <div class="d-flex gap-3 small text-white-75">
+                        <span><strong>GR No:</strong> @student.GrNo</span>
+                        <span>|</span>
+                        <span><strong>Class:</strong> @student.ClassName (@student.DivisionName)</span>
+                        <span>|</span>
+                        <span><strong>Roll No:</strong> @student.RollNo</span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="Collect" asp-route-studentId="@student.StudentId" class="btn btn-light text-primary fw-bold"><i class="bi bi-credit-card-fill me-1"></i> Collect Fee Payment</a>
+                    <a asp-action="Index" class="btn btn-outline-light"><i class="bi bi-arrow-left me-1"></i> All Payments</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipts ledger table -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header-crimson">
+                <h5>Fee Transaction Receipts</h5>
+                <a asp-controller="Students" asp-action="Index" class="btn btn-sm btn-outline-light"><i class="bi-arrow-left me-1"></i> Student List</a>
+            </div>
+            <div class="card-body-custom p-0">
+                <div class="table-responsive">
+                    <table class="table table-custom" id="studentPaymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Receipt ID</th>
+                                <th>Semester</th>
+                                <th>Payment Date</th>
+                                <th>Payment Mode</th>
+                                <th>Transaction Ref</th>
+                                <th>Photo Receipt</th>
+                                <th>Amount Paid (₹)</th>
+                                <th>Remaining Fee (₹)</th>
+                                <th>Total Installment</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="11" class="text-center py-4 text-muted">No fee transaction receipts registered for this student.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>#@item.PaymentDetailID</td>
+                                        <td class="fw-bold">@item.SemesterName</td>
+                                        <td>@item.CreatedDate.ToString("dd-MM-yyyy HH:mm")</td>
+                                        <td><span class="badge bg-secondary">@item.PaymentMode</span></td>
+                                        <td class="text-muted">@(item.TransactionRef ?? "-")</td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.Transactionphoto))
+                                            {
+                                                <button class="btn btn-xs btn-outline-primary" onclick="viewReceiptPhoto('@item.Transactionphoto')"><i class="bi-file-earmark-image"></i> View</button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td class="fw-bold text-success">₹ @item.FeePaid.ToString("N2")</td>
+                                        <td class="fw-bold @(item.FeeRemaining > 0 ? "text-danger" : "text-muted")">₹ @item.FeeRemaining.ToString("N2")</td>
+                                        <td>@item.TotalInstallment</td>
+                                        <td>
+                                            @if (item.IsFullyPaid)
+                                            {
+                                                <span class="badge bg-success">Fully Paid</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">Partially Paid</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <form asp-action="Delete" asp-route-id="@item.PaymentDetailID" asp-route-returnStudentId="@student.StudentId" method="post" class="d-inline" onsubmit="return confirmDelete(this);">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Payment">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Simple Bootstrap receipt photo preview modal -->
+<div class="modal fade" id="receiptPhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Receipt Photo Attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="receiptPreviewImg" src="" class="img-fluid border" alt="Receipt Photo" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ($('#studentPaymentsTable tbody tr').length > 1 || ($('#studentPaymentsTable tbody tr').length === 1 && $('#studentPaymentsTable tbody tr td').length > 1)) {
+                $('#studentPaymentsTable').DataTable({
+                    pageLength: 25,
+                    order: [[2, 'desc']],
+                    dom: '<"row mb-3"<"col-md-6"B><"col-md-6"f>>rt<"row mt-3"<"col-md-5"i><"col-md-7"p>>',
+                    buttons: [
+                        { 
+                            extend: 'excel', 
+                            className: 'btn btn-sm btn-outline-success', 
+                            text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                            exportOptions: { columns: ':not(:last-child)' }
+                        },
+                        { 
+                            extend: 'pdf', 
+                            className: 'btn btn-sm btn-outline-danger', 
+                            text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
+                            exportOptions: { columns: ':not(:last-child)' }
+                        },
+                        { 
+                            extend: 'print', 
+                            className: 'btn btn-sm btn-outline-secondary', 
+                            text: '<i class="bi bi-printer me-1"></i> Print',
+                            exportOptions: { columns: ':not(:last-child)' }
+                        }
+                    ],
+                    columnDefs: [
+                        { orderable: false, targets: [5, 10] }
+                    ]
+                });
+            }
+        });
+
+        function viewReceiptPhoto(base64Str) {
+            var myModal = new bootstrap.Modal(document.getElementById('receiptPhotoModal'));
+            document.getElementById('receiptPreviewImg').src = 'data:image/jpeg;base64,' + base64Str;
+            myModal.show();
+        }
+
+        function confirmDelete(form) {
+            Swal.fire({
+                title: 'Delete Payment?',
+                text: "This will permanently remove this payment record.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+    </script>
+}
