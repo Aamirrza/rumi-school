@@ -9,7 +9,7 @@ using SchoolManagement.Domain.Entities;
 
 namespace SchoolManagement.Web.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,Clerk")]
     public class ClassSchedulesController : Controller
     {
         private readonly IClassScheduleService _service;

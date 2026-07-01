@@ -20,17 +20,17 @@ namespace SchoolManagement.Application.Common
                 byte[] subkey = pbkdf2.GetBytes(32);
                 byte[] outputBytes = new byte[1 + 4 + 4 + 4 + 16 + 32];
                 outputBytes[0] = 0x01; // Format V3
-                
+
                 // Write PRF (1 = HMAC-SHA256)
                 WriteNetworkByteOrder(outputBytes, 1, 1);
                 // Write iteration count.
-                WriteNetworkByteOrder(outputBytes, 5, IterationCount);
+                WriteNetworkByteOrder(outputBytes, 5, (uint)IterationCount);
                 // Write salt size (16)
                 WriteNetworkByteOrder(outputBytes, 9, 16);
-                
+
                 Buffer.BlockCopy(salt, 0, outputBytes, 13, 16);
                 Buffer.BlockCopy(subkey, 0, outputBytes, 29, 32);
-                
+
                 return Convert.ToBase64String(outputBytes);
             }
         }
@@ -40,30 +40,66 @@ namespace SchoolManagement.Application.Common
             try
             {
                 byte[] decodedHashedPassword = Convert.FromBase64String(hashedPassword);
-                if (decodedHashedPassword.Length < 61) return false;
-                if (decodedHashedPassword[0] != 0x01) return false; // Verify format V3
-                
+
+                if (decodedHashedPassword.Length < 61)
+                    return false;
+
+                // Identity V3
+                if (decodedHashedPassword[0] != 0x01)
+                    return false;
+
                 uint prf = ReadNetworkByteOrder(decodedHashedPassword, 1);
-                uint iterCount = ReadNetworkByteOrder(decodedHashedPassword, 5);
+                uint iterationCount = ReadNetworkByteOrder(decodedHashedPassword, 5);
                 uint saltLength = ReadNetworkByteOrder(decodedHashedPassword, 9);
-                
-                if (saltLength != 16) return false;
-                
-                byte[] salt = new byte[16];
-                Buffer.BlockCopy(decodedHashedPassword, 13, salt, 0, 16);
-                
-                int subkeyLength = decodedHashedPassword.Length - 13 - 16;
-                if (subkeyLength != 32) return false;
-                
-                byte[] expectedSubkey = new byte[32];
-                Buffer.BlockCopy(decodedHashedPassword, 29, expectedSubkey, 0, 32);
-                
-                using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, (int)iterCount, HashAlgorithmName.SHA256))
+
+                if (saltLength == 0 || saltLength > 128)
+                    return false;
+
+                int saltLen = (int)saltLength;
+
+                byte[] salt = new byte[saltLen];
+                Buffer.BlockCopy(decodedHashedPassword, 13, salt, 0, saltLen);
+
+                int subkeyLength = decodedHashedPassword.Length - 13 - saltLen;
+
+                byte[] expectedSubkey = new byte[subkeyLength];
+                Buffer.BlockCopy(decodedHashedPassword,
+                                 13 + saltLen,
+                                 expectedSubkey,
+                                 0,
+                                 subkeyLength);
+
+                HashAlgorithmName algorithm;
+
+                switch (prf)
                 {
-                    byte[] actualSubkey = pbkdf2.GetBytes(32);
-                    
-                    // FixedTimeEquals is safe against timing attacks
-                    return CryptographicOperations.FixedTimeEquals(actualSubkey, expectedSubkey);
+                    case 0:
+                        algorithm = HashAlgorithmName.SHA1;
+                        break;
+
+                    case 1:
+                        algorithm = HashAlgorithmName.SHA256;
+                        break;
+
+                    case 2:
+                        algorithm = HashAlgorithmName.SHA512;
+                        break;
+
+                    default:
+                        return false;
+                }
+
+                using (var pbkdf2 = new Rfc2898DeriveBytes(
+                    password,
+                    salt,
+                    (int)iterationCount,
+                    algorithm))
+                {
+                    byte[] actualSubkey = pbkdf2.GetBytes(subkeyLength);
+
+                    return CryptographicOperations.FixedTimeEquals(
+                        actualSubkey,
+                        expectedSubkey);
                 }
             }
             catch

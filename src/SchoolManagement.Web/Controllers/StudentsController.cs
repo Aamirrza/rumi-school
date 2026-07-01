@@ -240,7 +240,7 @@ namespace SchoolManagement.Web.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Clerk")]
         public async Task<IActionResult> Allocate(int id)
         {
             var list = await _studentService.GetByIdAsync(id);
@@ -261,7 +261,7 @@ namespace SchoolManagement.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Clerk")]
         public async Task<IActionResult> Allocate(StudentAllocationModel model)
         {
             var list = await _studentService.GetByIdAsync(model.StudentId);
@@ -341,7 +341,7 @@ namespace SchoolManagement.Web.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Clerk")]
         public async Task<IActionResult> Delete(int id)
         {
             var list = await _studentService.GetByIdAsync(id);
@@ -354,7 +354,7 @@ namespace SchoolManagement.Web.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator,Clerk")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (!TryGetCurrentUserId(out var performedBy))

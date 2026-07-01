@@ -78,7 +78,7 @@ namespace SchoolManagement.Infrastructure.Data
             modelBuilder.Entity<AuditLog>().ToTable("AuditLogs");
             modelBuilder.Entity<AuditLog>().HasKey(e => e.AuditLogId);
 
-            modelBuilder.Entity<SemesterMaster>().ToTable("SemesterMaster");
+            modelBuilder.Entity<SemesterMaster>().ToTable("SMS_SemesterMaster");
             modelBuilder.Entity<SemesterMaster>().HasKey(e => e.SemesterID);
 
             modelBuilder.Entity<FeeMaster>().ToTable("FeeMaster");

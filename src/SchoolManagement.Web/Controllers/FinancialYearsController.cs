@@ -8,7 +8,7 @@ using SchoolManagement.Domain.Entities;
 
 namespace SchoolManagement.Web.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,Clerk")]
     public class FinancialYearsController : Controller
     {
         private readonly IFinancialYearService _service;

@@ -39,8 +39,6 @@
                         </a>
                     </li>
                     
-                    @if (User.IsInRole("Administrator"))
-                    {
                         <li class="menu-header">Setup & Config</li>
 
                         <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Divisions" ? "active" : "")">
@@ -97,7 +95,6 @@
                                 <span>Pending Fees Report</span>
                             </a>
                         </li>
-                    }
                 </ul>
                 <div class="sidebar-footer">
                     <div class="user-profile">

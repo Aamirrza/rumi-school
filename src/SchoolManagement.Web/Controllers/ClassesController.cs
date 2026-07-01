@@ -7,7 +7,7 @@ using SchoolManagement.Domain.Entities;
 
 namespace SchoolManagement.Web.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,Clerk")]
     public class ClassesController : Controller
     {
         private readonly IClassService _service;
