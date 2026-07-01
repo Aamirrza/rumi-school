@@ -69,7 +69,7 @@ namespace SchoolManagement.Infrastructure.Repositories
         public async Task<System.Collections.Generic.IEnumerable<string>> GetUserRolesAsync(int userId)
         {
             var roles = await _context.Roles
-                .FromSqlRaw("SELECT r.* FROM Roles r INNER JOIN UserRoles ur ON r.RoleId = ur.RoleId WHERE ur.UserId = @UserId AND ur.IsDeleted = 0 AND ur.IsActive = 1 AND r.IsDeleted = 0 AND r.IsActive = 1", new SqlParameter("@UserId", userId))
+                .FromSqlRaw("SELECT r.* FROM SMS_Roles  r INNER JOIN SMS_UserRoles ur ON r.RoleId = ur.RoleId WHERE ur.UserId = @UserId AND ur.IsDeleted = 0 AND ur.IsActive = 1 AND r.IsDeleted = 0 AND r.IsActive = 1", new SqlParameter("@UserId", userId))
                 .ToListAsync();
 
             var roleNames = new System.Collections.Generic.List<string>();
